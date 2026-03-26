@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Finans">
+  <meta name="theme-color" content="#1a1a2e">
+  <title>Finans Pro</title>
+  <style>
+    :root {
+      --bg: #f8f7f4; --bg-card: #ffffff; --bg-secondary: #f0eeea;
+      --text: #2d2d2d; --text-muted: #7a7a7a; --text-light: #a0a0a0;
+      --border: #e8e6e1; --accent: #6b5b4f; --success: #4a9b7f;
+      --warning: #d4a853; --danger: #c76b6b; --info: #5b8fb9;
+      --receivable: #7b68a6;
+    }
+    .dark {
+      --bg: #121218; --bg-card: #1e1e28; --bg-secondary: #252532;
+      --text: #f0f0f0; --text-muted: #8a8a9a; --text-light: #5a5a6a;
+      --border: #2a2a3a; --accent: #9b8b7f; --receivable: #9b88c4;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body, #root { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif; background: var(--bg); color: var(--text); }
+    body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+    input, select { font-size: 16px !important; font-family: inherit; }
+    ::-webkit-scrollbar { display: none; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes checkPop { 0% { transform: scale(0); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+    .fade-up { animation: fadeUp 0.35s ease-out forwards; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel">
+    const { useState, useEffect, useCallback, useMemo } = React;
+
+    const MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+    const ICONS = {
+      netflix:'🎬',hbo:'📺',amazon:'📦',canva:'🎨',chatgpt:'🤖',gemini:'✨',claude:'🧠',
+      apple:'🎵',spotify:'🎧',youtube:'▶️',adobe:'🅰️',antivirus:'🛡️',disney:'🏰',
+      dropbox:'📁',icloud:'☁️',linkedin:'💼',microsoft:'🪟',notion:'📝',figma:'🎯',
+      elektrik:'⚡',su:'💧',doğalgaz:'🔥',internet:'🌐',telefon:'📱',market:'🛒',
+      kira:'🏠',benzin:'⛽',yakıt:'⛽',yemek:'🍽️',ulaşım:'🚌',sağlık:'🏥',eğitim:'📚',
+      sigorta:'🛡️',aidat:'🏢',banka:'🏦',kredi:'💳'
+    };
+    const DEFAULT_SUBS = [
+      {id:1,name:'Netflix',amount:0},{id:2,name:'HBO Max',amount:0},{id:3,name:'Amazon Prime',amount:0},
+      {id:4,name:'Canva',amount:0},{id:5,name:'ChatGPT',amount:0},{id:6,name:'Gemini',amount:0},
+      {id:7,name:'Claude',amount:0},{id:8,name:'Apple Music',amount:0},{id:9,name:'Antivirus',amount:0},{id:10,name:'Adobe',amount:0}
+    ];
+
+    const storage = {
+      get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+      set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+    };
+    const getIcon = name => {
+      const l = name.toLowerCase();
+      for (const [k, v] of Object.entries(ICONS)) if (l.includes(k)) return v;
+      return '💳';
+    };
+    const fmt = n => n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
+    const monthNum = (y, m) => y * 12 + m;
+    const vibrate = (p = 10) => navigator.vibrate?.(p);
+
+    const MiniChart = ({ data, color, height = 40 }) => {
+      const max = Math.max(...data, 1);
+      return (
+        <svg width="100%" height={height} style={{display:'block'}}>
+          <defs>
+            <linearGradient id={`grad-${color}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity="0.3"/>
+              <stop offset="100%" stopColor={color} stopOpacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d={`M0,${height} ${data.map((v,i) => `L${(i/(data.length-1))*100}%,${height - (v/max)*(height-5)}`).join(' ')} L100%,${height} Z`} fill={`url(#grad-${color})`}/>
+          <path d={data.map((v,i) => `${i===0?'M':'L'}${(i/(data.length-1))*100}%,${height - (v/max)*(height-5)}`).join(' ')} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      );
+    };
+
+    const DonutChart = ({ segments, size = 120 }) => {
+      const total = segments.reduce((s, seg) => s + seg.value, 0) || 1;
+      let cumulative = 0;
+      const r = 40, c = 2 * Math.PI * r;
+      return (
+        <svg width={size} height={size} viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r={r} fill="none" stroke="var(--border)" strokeWidth="12"/>
+          {segments.map((seg, i) => {
+            const pct = seg.value / total;
+            const offset = c * (1 - cumulative);
+            cumulative += pct;
+            return <circle key={i} cx="50" cy="50" r={r} fill="none" stroke={seg.color} strokeWidth="12" 
+              strokeDasharray={`${c * pct} ${c}`} strokeDashoffset={offset} 
+              transform="rotate(-90 50 50)" style={{transition:'all 0.5s ease'}}/>;
+          })}
+          <text x="50" y="50" textAnchor="middle" dy="0.35em" fontSize="14" fontWeight="700" fill="var(--text)">
+            ₺{fmt(total).split(',')[0]}
+          </text>
+        </svg>
+      );
+    };
+
+    const ProgressRing = ({ progress, size = 44, color }) => {
+      const r = 18, c = 2 * Math.PI * r;
+      return (
+        <svg width={size} height={size} viewBox="0 0 44 44">
+          <circle cx="22" cy="22" r={r} fill="none" stroke="var(--border)" strokeWidth="4"/>
+          <circle cx="22" cy="22" r={r} fill="none" stroke={color} strokeWidth="4" 
+            strokeDasharray={c} strokeDashoffset={c * (1 - progress / 100)} 
+            transform="rotate(-90 22 22)" strokeLinecap="round" style={{transition:'stroke-dashoffset 0.5s ease'}}/>
+          <text x="22" y="22" textAnchor="middle" dy="0.35em" fontSize="10" fontWeight="600" fill="var(--text)">
+            {progress.toFixed(0)}%
+          </text>
+        </svg>
+      );
+    };
+
+    function App() {
+      const [dark, setDark] = useState(() => storage.get('dark-mode') ?? false);
+      const [tab, setTab] = useState('dashboard');
+      const [subs, setSubs] = useState([]);
+      const [debts, setDebts] = useState([]);
+      const [receivables, setReceivables] = useState([]); // YENİ: Alacaklar
+      const [oneTime, setOneTime] = useState({});
+      const [recurring, setRecurring] = useState([]);
+      const [paid, setPaid] = useState({});
+      const [loading, setLoading] = useState(true);
+
+      const now = new Date();
+      const [month, setMonth] = useState(now.getMonth());
+      const [year, setYear] = useState(now.getFullYear());
+      const monthKey = `${year}-${month}`;
+
+      const [newSub, setNewSub] = useState({name:'',amount:''});
+      const [newDebt, setNewDebt] = useState({name:'',total:''});
+      const [newReceivable, setNewReceivable] = useState({name:'',total:''}); // YENİ
+      const [newExp, setNewExp] = useState({name:'',amount:'',recurring:false,endMonth:now.getMonth(),endYear:now.getFullYear()+1});
+      const [debtAction, setDebtAction] = useState({});
+      const [recAction, setRecAction] = useState({}); // YENİ: Alacak aksiyonları
+      const [editSub, setEditSub] = useState(null);
+      const [showRecForm, setShowRecForm] = useState(false);
+
+      useEffect(() => {
+        document.documentElement.className = dark ? 'dark' : '';
+        storage.set('dark-mode', dark);
+      }, [dark]);
+
+      useEffect(() => {
+        setSubs(storage.get('fp-subs') || DEFAULT_SUBS);
+        setDebts(storage.get('fp-debts') || []);
+        setReceivables(storage.get('fp-receivables') || []); // YENİ
+        setOneTime(storage.get('fp-onetime') || {});
+        setRecurring(storage.get('fp-recurring') || []);
+        setPaid(storage.get('fp-paid') || {});
+        if (!storage.get('fp-subs')) storage.set('fp-subs', DEFAULT_SUBS);
+        setLoading(false);
+      }, []);
+
+      const save = (k, d, fn) => { fn(d); storage.set(k, d); };
+
+      // Calculations
+      const totalSubs = useMemo(() => subs.reduce((s, x) => s + x.amount, 0), [subs]);
+      
+      const debtStats = useMemo(() => {
+        let borrowed = 0, paidAmt = 0;
+        debts.forEach(d => d.transactions?.forEach(t => t.type === 'borrow' ? borrowed += t.amount : paidAmt += t.amount));
+        return { borrowed, paid: paidAmt, remaining: borrowed - paidAmt };
+      }, [debts]);
+
+      // YENİ: Alacak hesaplamaları
+      const receivableStats = useMemo(() => {
+        let lent = 0, collected = 0;
+        receivables.forEach(r => r.transactions?.forEach(t => t.type === 'lend' ? lent += t.amount : collected += t.amount));
+        return { lent, collected, remaining: lent - collected };
+      }, [receivables]);
+
+      const getExpenses = useCallback(() => {
+        const ot = oneTime[monthKey] || [];
+        const mn = monthNum(year, month);
+        const rec = recurring.filter(e => mn >= monthNum(e.startYear, e.startMonth) && mn <= monthNum(e.endYear, e.endMonth));
+        return { oneTime: ot, recurring: rec };
+      }, [oneTime, recurring, monthKey, year, month]);
+
+      const { oneTime: otList, recurring: recList } = getExpenses();
+      const paidKeys = paid[monthKey] || [];
+      const isPaid = (id, isRec) => paidKeys.includes((isRec ? 'r-' : 'o-') + id);
+
+      const allExp = [...otList.map(e => ({...e, isRec: false})), ...recList.map(e => ({...e, isRec: true}))];
+      const totalExp = allExp.reduce((s, e) => s + e.amount, 0);
+      const paidExp = allExp.filter(e => isPaid(e.id, e.isRec)).reduce((s, e) => s + e.amount, 0);
+      const unpaidExp = totalExp - paidExp;
+
+      const chartData = useMemo(() => {
+        const data = [];
+        for (let i = 5; i >= 0; i--) {
+          let m = now.getMonth() - i, y = now.getFullYear();
+          if (m < 0) { m += 12; y--; }
+          const key = `${y}-${m}`;
+          const ot = oneTime[key] || [];
+          const mn = monthNum(y, m);
+          const rec = recurring.filter(e => mn >= monthNum(e.startYear, e.startMonth) && mn <= monthNum(e.endYear, e.endMonth));
+          data.push({ month: MONTHS[m].slice(0,3), value: ot.reduce((s,e) => s+e.amount, 0) + rec.reduce((s,e) => s+e.amount, 0) });
+        }
+        return data;
+      }, [oneTime, recurring, now]);
+
+      // Subscription Actions
+      const addSub = () => {
+        if (!newSub.name || !newSub.amount) return;
+        vibrate();
+        save('fp-subs', [...subs, {id: Date.now(), name: newSub.name, amount: parseFloat(newSub.amount)}], setSubs);
+        setNewSub({name:'',amount:''});
+      };
+      const updateSub = (id, amt) => {
+        vibrate();
+        save('fp-subs', subs.map(s => s.id === id ? {...s, amount: parseFloat(amt) || 0} : s), setSubs);
+        setEditSub(null);
+      };
+      const delSub = id => { vibrate(20); save('fp-subs', subs.filter(s => s.id !== id), setSubs); };
+
+      // Debt Actions
+      const addDebt = () => {
+        if (!newDebt.name || !newDebt.total) return;
+        vibrate();
+        save('fp-debts', [...debts, {id: Date.now(), name: newDebt.name, transactions: [{id: Date.now(), type:'borrow', amount: parseFloat(newDebt.total), date: new Date().toISOString()}]}], setDebts);
+        setNewDebt({name:'',total:''});
+      };
+      const debtTx = (id, type) => {
+        const a = debtAction[id];
+        if (!a?.amount || parseFloat(a.amount) <= 0) return;
+        vibrate();
+        save('fp-debts', debts.map(d => d.id === id ? {...d, transactions: [...d.transactions, {id: Date.now(), type, amount: parseFloat(a.amount), date: new Date().toISOString()}]} : d), setDebts);
+        setDebtAction({...debtAction, [id]: {type: null, amount: ''}});
+      };
+      const delDebt = id => { if (confirm('Bu borcu sil?')) { vibrate(20); save('fp-debts', debts.filter(d => d.id !== id), setDebts); } };
+      const getDebtRemaining = d => d.transactions?.reduce((s, t) => t.type === 'borrow' ? s + t.amount : s - t.amount, 0) || 0;
+
+      // YENİ: Alacak Actions
+      const addReceivable = () => {
+        if (!newReceivable.name || !newReceivable.total) return;
+        vibrate();
+        save('fp-receivables', [...receivables, {id: Date.now(), name: newReceivable.name, transactions: [{id: Date.now(), type:'lend', amount: parseFloat(newReceivable.total), date: new Date().toISOString()}]}], setReceivables);
+        setNewReceivable({name:'',total:''});
+      };
+      const recTx = (id, type) => {
+        const a = recAction[id];
+        if (!a?.amount || parseFloat(a.amount) <= 0) return;
+        vibrate();
+        save('fp-receivables', receivables.map(r => r.id === id ? {...r, transactions: [...r.transactions, {id: Date.now(), type, amount: parseFloat(a.amount), date: new Date().toISOString()}]} : r), setReceivables);
+        setRecAction({...recAction, [id]: {type: null, amount: ''}});
+      };
+      const delReceivable = id => { if (confirm('Bu alacağı sil?')) { vibrate(20); save('fp-receivables', receivables.filter(r => r.id !== id), setReceivables); } };
+      const getRecRemaining = r => r.transactions?.reduce((s, t) => t.type === 'lend' ? s + t.amount : s - t.amount, 0) || 0;
+
+      // Expense Actions
+      const addExp = () => {
+        if (!newExp.name || !newExp.amount) return;
+        vibrate();
+        if (newExp.recurring) {
+          save('fp-recurring', [...recurring, {id: Date.now(), name: newExp.name, amount: parseFloat(newExp.amount), startMonth: month, startYear: year, endMonth: parseInt(newExp.endMonth), endYear: parseInt(newExp.endYear)}], setRecurring);
+        } else {
+          const curr = oneTime[monthKey] || [];
+          save('fp-onetime', {...oneTime, [monthKey]: [...curr, {id: Date.now(), name: newExp.name, amount: parseFloat(newExp.amount)}]}, setOneTime);
+        }
+        setNewExp({name:'',amount:'',recurring:false,endMonth:now.getMonth(),endYear:now.getFullYear()+1});
+        setShowRecForm(false);
+      };
+      const togglePaid = (id, isRec) => {
+        vibrate();
+        const key = (isRec ? 'r-' : 'o-') + id;
+        const curr = paid[monthKey] || [];
+        save('fp-paid', {...paid, [monthKey]: curr.includes(key) ? curr.filter(k => k !== key) : [...curr, key]}, setPaid);
+      };
+      const delExp = (id, isRec) => {
+        vibrate(20);
+        if (isRec) {
+          if (confirm('Bu tekrarlayan gideri sil?')) save('fp-recurring', recurring.filter(e => e.id !== id), setRecurring);
+        } else {
+          const curr = oneTime[monthKey] || [];
+          save('fp-onetime', {...oneTime, [monthKey]: curr.filter(e => e.id !== id)}, setOneTime);
+        }
+      };
+
+      const prevMonth = () => { vibrate(5); if (month === 0) { setMonth(11); setYear(year-1); } else setMonth(month-1); };
+      const nextMonth = () => { vibrate(5); if (month === 11) { setMonth(0); setYear(year+1); } else setMonth(month+1); };
+
+      if (loading) return <div style={S.loading}><div style={S.spinner}/></div>;
+
+      return (
+        <div style={S.app}>
+          {/* Header */}
+          <header style={S.header}>
+            <div>
+              <h1 style={S.logo}>Finans<span style={{color:'var(--accent)'}}>Pro</span></h1>
+              <p style={S.date}>{MONTHS[now.getMonth()]} {now.getFullYear()}</p>
+            </div>
+            <button onClick={() => setDark(!dark)} style={S.themeBtn}>{dark ? '☀️' : '🌙'}</button>
+          </header>
+
+          {/* Content */}
+          <main style={S.main}>
+            {/* Dashboard */}
+            {tab === 'dashboard' && (
+              <div className="fade-up">
+                <div style={S.statsGrid}>
+                  <div style={{...S.statCard, borderLeft: '3px solid var(--accent)'}} onClick={() => setTab('subs')}>
+                    <span style={S.statIcon}>📱</span>
+                    <div>
+                      <p style={S.statLabel}>Abonelik</p>
+                      <p style={S.statValue}>₺{fmt(totalSubs)}</p>
+                    </div>
+                  </div>
+                  <div style={{...S.statCard, borderLeft: '3px solid var(--warning)'}} onClick={() => setTab('debts')}>
+                    <span style={S.statIcon}>📉</span>
+                    <div>
+                      <p style={S.statLabel}>Borç</p>
+                      <p style={S.statValue}>₺{fmt(Math.max(0, debtStats.remaining))}</p>
+                    </div>
+                  </div>
+                  <div style={{...S.statCard, borderLeft: '3px solid var(--receivable)'}} onClick={() => setTab('receivables')}>
+                    <span style={S.statIcon}>📈</span>
+                    <div>
+                      <p style={S.statLabel}>Alacak</p>
+                      <p style={S.statValue}>₺{fmt(Math.max(0, receivableStats.remaining))}</p>
+                    </div>
+                  </div>
+                  <div style={{...S.statCard, borderLeft: `3px solid ${unpaidExp > 0 ? 'var(--danger)' : 'var(--success)'}`}} onClick={() => setTab('expenses')}>
+                    <span style={S.statIcon}>{unpaidExp > 0 ? '⏳' : '✓'}</span>
+                    <div>
+                      <p style={S.statLabel}>Kalan</p>
+                      <p style={S.statValue}>₺{fmt(unpaidExp)}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={S.card}>
+                  <h3 style={S.cardTitle}>Aylık Gider Trendi</h3>
+                  <div style={{height: 80, marginTop: 12}}>
+                    <MiniChart data={chartData.map(d => d.value)} color="var(--accent)" height={80}/>
+                  </div>
+                  <div style={S.chartLabels}>
+                    {chartData.map((d, i) => <span key={i} style={S.chartLabel}>{d.month}</span>)}
+                  </div>
+                </div>
+
+                <div style={S.card}>
+                  <h3 style={S.cardTitle}>Genel Bakış</h3>
+                  <div style={S.donutContainer}>
+                    <DonutChart segments={[
+                      {value: totalSubs, color: 'var(--accent)'},
+                      {value: Math.max(0, debtStats.remaining), color: 'var(--warning)'},
+                      {value: Math.max(0, receivableStats.remaining), color: 'var(--receivable)'},
+                      {value: unpaidExp, color: 'var(--danger)'}
+                    ]} size={130}/>
+                    <div style={S.donutLegend}>
+                      <div style={S.legendItem}><span style={{...S.legendDot, background:'var(--accent)'}}/>Abonelik</div>
+                      <div style={S.legendItem}><span style={{...S.legendDot, background:'var(--warning)'}}/>Borç</div>
+                      <div style={S.legendItem}><span style={{...S.legendDot, background:'var(--receivable)'}}/>Alacak</div>
+                      <div style={S.legendItem}><span style={{...S.legendDot, background:'var(--danger)'}}/>Gider</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Net Durum */}
+                <div style={{...S.card, background: receivableStats.remaining > debtStats.remaining ? 'linear-gradient(135deg, var(--success), #3d8b6a)' : 'linear-gradient(135deg, var(--warning), #c49543)', color: '#fff'}}>
+                  <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                    <div>
+                      <p style={{fontSize:12, opacity:0.9}}>Net Durum</p>
+                      <p style={{fontSize:24, fontWeight:700, marginTop:4}}>
+                        {receivableStats.remaining >= debtStats.remaining ? '+' : '-'}₺{fmt(Math.abs(receivableStats.remaining - debtStats.remaining))}
+                      </p>
+                    </div>
+                    <span style={{fontSize:32}}>{receivableStats.remaining >= debtStats.remaining ? '😊' : '😔'}</span>
+                  </div>
+                  <p style={{fontSize:11, marginTop:8, opacity:0.8}}>
+                    {receivableStats.remaining >= debtStats.remaining ? 'Alacakların borçlarından fazla!' : 'Borçların alacaklarından fazla'}
+                  </p>
+                </div>
+
+                <div style={{...S.totalCard, background: 'linear-gradient(135deg, var(--accent), #8a7a6e)'}}>
+                  <div>
+                    <p style={{fontSize:12,opacity:0.9}}>Toplam Aylık Yük</p>
+                    <p style={{fontSize:24,fontWeight:700,marginTop:4}}>₺{fmt(totalSubs + totalExp)}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Subscriptions */}
+            {tab === 'subs' && (
+              <div className="fade-up">
+                <div style={S.sectionHeader}>
+                  <h2 style={S.sectionTitle}>Abonelikler</h2>
+                  <span style={S.badge}>₺{fmt(totalSubs)}/ay</span>
+                </div>
+
+                <p style={S.hint}>💡 Fiyata dokun → düzenle</p>
+
+                {subs.map(s => (
+                  <div key={s.id} style={S.listItem}>
+                    <span style={S.listIcon}>{getIcon(s.name)}</span>
+                    <span style={S.listName}>{s.name}</span>
+                    <div style={S.listRight}>
+                      {editSub === s.id ? (
+                        <input type="number" autoFocus defaultValue={s.amount||''} placeholder="₺"
+                          onBlur={e => updateSub(s.id, e.target.value)} onKeyDown={e => e.key==='Enter' && updateSub(s.id, e.target.value)}
+                          style={S.inlineInput}/>
+                      ) : (
+                        <span style={{...S.listAmt, color:'var(--accent)', cursor:'pointer'}} onClick={() => setEditSub(s.id)}>
+                          {s.amount > 0 ? `₺${fmt(s.amount)}` : '—'}
+                        </span>
+                      )}
+                      <button onClick={() => delSub(s.id)} style={S.delBtn}>×</button>
+                    </div>
+                  </div>
+                ))}
+
+                <div style={S.addRow}>
+                  <input type="text" placeholder="Platform adı" value={newSub.name} onChange={e => setNewSub({...newSub, name: e.target.value})} style={S.input}/>
+                  <input type="number" placeholder="₺" value={newSub.amount} onChange={e => setNewSub({...newSub, amount: e.target.value})} style={{...S.input, width:80, flex:'none'}}/>
+                  <button onClick={addSub} style={{...S.addBtn, background:'var(--accent)'}}>+</button>
+                </div>
+              </div>
+            )}
+
+            {/* Debts */}
+            {tab === 'debts' && (
+              <div className="fade-up">
+                <div style={S.sectionHeader}>
+                  <h2 style={S.sectionTitle}>Borçlarım</h2>
+                  <span style={{...S.badge, background: debtStats.remaining > 0 ? 'var(--warning)' : 'var(--success)'}}>
+                    ₺{fmt(Math.max(0, debtStats.remaining))}
+                  </span>
+                </div>
+
+                <div style={S.addRow}>
+                  <input type="text" placeholder="Kime borçluyum?" value={newDebt.name} onChange={e => setNewDebt({...newDebt, name: e.target.value})} style={S.input}/>
+                  <input type="number" placeholder="Tutar ₺" value={newDebt.total} onChange={e => setNewDebt({...newDebt, total: e.target.value})} style={{...S.input, width:100, flex:'none'}}/>
+                  <button onClick={addDebt} style={{...S.addBtn, background:'var(--warning)'}}>+</button>
+                </div>
+
+                {debts.map(d => {
+                  const rem = getDebtRemaining(d);
+                  const borrowed = d.transactions?.filter(t => t.type==='borrow').reduce((s,t) => s+t.amount, 0) || 0;
+                  const paidAmt = d.transactions?.filter(t => t.type==='pay').reduce((s,t) => s+t.amount, 0) || 0;
+                  const pct = borrowed > 0 ? (paidAmt / borrowed) * 100 : 0;
+                  const action = debtAction[d.id] || {};
+                  const done = rem <= 0;
+
+                  return (
+                    <div key={d.id} style={{...S.debtCard, opacity: done ? 0.6 : 1}}>
+                      <div style={S.debtTop}>
+                        <div style={S.debtInfo}>
+                          <span style={S.debtIcon}>{getIcon(d.name)}</span>
+                          <div>
+                            <p style={S.debtName}>{d.name}</p>
+                            <p style={S.debtMeta}>Alınan: ₺{fmt(borrowed)} • Ödenen: ₺{fmt(paidAmt)}</p>
+                          </div>
+                        </div>
+                        <ProgressRing progress={Math.min(100, pct)} color={done ? 'var(--success)' : 'var(--warning)'}/>
+                      </div>
+
+                      <div style={S.debtRemaining}>
+                        {done ? <span style={{color:'var(--success)', fontWeight:600}}>✓ Borç Kapandı!</span> : 
+                          <>Kalan Borç: <strong style={{color:'var(--warning)'}}>₺{fmt(rem)}</strong></>}
+                      </div>
+
+                      {!done && (
+                        <>
+                          <div style={S.debtActions}>
+                            <button style={{...S.actBtn, ...(action.type==='pay' ? {background:'var(--success)', color:'#fff'} : {})}}
+                              onClick={() => setDebtAction({...debtAction, [d.id]: {type:'pay', amount:''}})}>💸 Ödeme Yap</button>
+                            <button style={{...S.actBtn, ...(action.type==='borrow' ? {background:'var(--danger)', color:'#fff'} : {})}}
+                              onClick={() => setDebtAction({...debtAction, [d.id]: {type:'borrow', amount:''}})}>➕ Borç Ekle</button>
+                          </div>
+                          {action.type && (
+                            <div style={S.actInput}>
+                              <input type="number" placeholder={action.type==='pay' ? 'Ödeme tutarı' : 'Ek borç tutarı'} value={action.amount}
+                                onChange={e => setDebtAction({...debtAction, [d.id]: {...action, amount: e.target.value}})} style={{...S.input, flex:1}}/>
+                              <button onClick={() => debtTx(d.id, action.type)} style={{...S.confirmBtn, background: action.type==='pay' ? 'var(--success)' : 'var(--danger)'}}>
+                                {action.type==='pay' ? '✓' : '+'}
+                              </button>
+                              <button onClick={() => setDebtAction({...debtAction, [d.id]: {type:null}})} style={S.cancelBtn}>×</button>
+                            </div>
+                          )}
+                        </>
+                      )}
+
+                      {d.transactions?.length > 1 && (
+                        <div style={S.txHistory}>
+                          {d.transactions.slice(-3).reverse().map(t => (
+                            <div key={t.id} style={S.txItem}>
+                              <span style={{...S.txType, color: t.type==='pay' ? 'var(--success)' : 'var(--danger)'}}>
+                                {t.type==='pay' ? '↓ Ödeme' : '↑ Borç'}
+                              </span>
+                              <span style={S.txAmt}>₺{fmt(t.amount)}</span>
+                              <span style={S.txDate}>{new Date(t.date).toLocaleDateString('tr-TR', {day:'2-digit', month:'short'})}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <button onClick={() => delDebt(d.id)} style={S.debtDel}>Sil</button>
+                    </div>
+                  );
+                })}
+
+                {debts.length === 0 && <p style={S.empty}>Borç kaydı yok 🎉</p>}
+              </div>
+            )}
+
+            {/* YENİ: Receivables (Alacaklar) */}
+            {tab === 'receivables' && (
+              <div className="fade-up">
+                <div style={S.sectionHeader}>
+                  <h2 style={S.sectionTitle}>Alacaklarım</h2>
+                  <span style={{...S.badge, background: receivableStats.remaining > 0 ? 'var(--receivable)' : 'var(--text-muted)'}}>
+                    ₺{fmt(Math.max(0, receivableStats.remaining))}
+                  </span>
+                </div>
+
+                <div style={S.addRow}>
+                  <input type="text" placeholder="Kimden alacağım?" value={newReceivable.name} onChange={e => setNewReceivable({...newReceivable, name: e.target.value})} style={S.input}/>
+                  <input type="number" placeholder="Tutar ₺" value={newReceivable.total} onChange={e => setNewReceivable({...newReceivable, total: e.target.value})} style={{...S.input, width:100, flex:'none'}}/>
+                  <button onClick={addReceivable} style={{...S.addBtn, background:'var(--receivable)'}}>+</button>
+                </div>
+
+                {receivables.map(r => {
+                  const rem = getRecRemaining(r);
+                  const lent = r.transactions?.filter(t => t.type==='lend').reduce((s,t) => s+t.amount, 0) || 0;
+                  const collected = r.transactions?.filter(t => t.type==='collect').reduce((s,t) => s+t.amount, 0) || 0;
+                  const pct = lent > 0 ? (collected / lent) * 100 : 0;
+                  const action = recAction[r.id] || {};
+                  const done = rem <= 0;
+
+                  return (
+                    <div key={r.id} style={{...S.debtCard, opacity: done ? 0.6 : 1, borderLeft: '3px solid var(--receivable)'}}>
+                      <div style={S.debtTop}>
+                        <div style={S.debtInfo}>
+                          <span style={S.debtIcon}>👤</span>
+                          <div>
+                            <p style={S.debtName}>{r.name}</p>
+                            <p style={S.debtMeta}>Verilen: ₺{fmt(lent)} • Tahsil: ₺{fmt(collected)}</p>
+                          </div>
+                        </div>
+                        <ProgressRing progress={Math.min(100, pct)} color={done ? 'var(--success)' : 'var(--receivable)'}/>
+                      </div>
+
+                      <div style={S.debtRemaining}>
+                        {done ? <span style={{color:'var(--success)', fontWeight:600}}>✓ Alacak Tahsil Edildi!</span> : 
+                          <>Kalan Alacak: <strong style={{color:'var(--receivable)'}}>₺{fmt(rem)}</strong></>}
+                      </div>
+
+                      {!done && (
+                        <>
+                          <div style={S.debtActions}>
+                            <button style={{...S.actBtn, ...(action.type==='collect' ? {background:'var(--success)', color:'#fff'} : {})}}
+                              onClick={() => setRecAction({...recAction, [r.id]: {type:'collect', amount:''}})}>💰 Tahsil Et</button>
+                            <button style={{...S.actBtn, ...(action.type==='lend' ? {background:'var(--receivable)', color:'#fff'} : {})}}
+                              onClick={() => setRecAction({...recAction, [r.id]: {type:'lend', amount:''}})}>➕ Borç Ver</button>
+                          </div>
+                          {action.type && (
+                            <div style={S.actInput}>
+                              <input type="number" placeholder={action.type==='collect' ? 'Tahsil tutarı' : 'Ek borç verme'} value={action.amount}
+                                onChange={e => setRecAction({...recAction, [r.id]: {...action, amount: e.target.value}})} style={{...S.input, flex:1}}/>
+                              <button onClick={() => recTx(r.id, action.type)} style={{...S.confirmBtn, background: action.type==='collect' ? 'var(--success)' : 'var(--receivable)'}}>
+                                {action.type==='collect' ? '✓' : '+'}
+                              </button>
+                              <button onClick={() => setRecAction({...recAction, [r.id]: {type:null}})} style={S.cancelBtn}>×</button>
+                            </div>
+                          )}
+                        </>
+                      )}
+
+                      {r.transactions?.length > 1 && (
+                        <div style={S.txHistory}>
+                          {r.transactions.slice(-3).reverse().map(t => (
+                            <div key={t.id} style={S.txItem}>
+                              <span style={{...S.txType, color: t.type==='collect' ? 'var(--success)' : 'var(--receivable)'}}>
+                                {t.type==='collect' ? '↓ Tahsil' : '↑ Verilen'}
+                              </span>
+                              <span style={S.txAmt}>₺{fmt(t.amount)}</span>
+                              <span style={S.txDate}>{new Date(t.date).toLocaleDateString('tr-TR', {day:'2-digit', month:'short'})}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <button onClick={() => delReceivable(r.id)} style={S.debtDel}>Sil</button>
+                    </div>
+                  );
+                })}
+
+                {receivables.length === 0 && <p style={S.empty}>Alacak kaydı yok</p>}
+              </div>
+            )}
+
+            {/* Expenses */}
+            {tab === 'expenses' && (
+              <div className="fade-up">
+                <div style={S.monthNav}>
+                  <button onClick={prevMonth} style={S.navBtn}>‹</button>
+                  <div style={S.monthTitle}>
+                    <span style={{fontSize:18, fontWeight:600}}>{MONTHS[month]}</span>
+                    <span style={{fontSize:12, color:'var(--text-muted)'}}>{year}</span>
+                  </div>
+                  <button onClick={nextMonth} style={S.navBtn}>›</button>
+                </div>
+
+                <div style={S.miniCal}>
+                  {MONTHS.map((m, i) => {
+                    const mn = monthNum(year, i);
+                    const hasData = (oneTime[`${year}-${i}`]||[]).length > 0 || recurring.some(e => mn >= monthNum(e.startYear, e.startMonth) && mn <= monthNum(e.endYear, e.endMonth));
+                    return (
+                      <button key={i} onClick={() => { vibrate(5); setMonth(i); }} style={{
+                        ...S.calBtn, ...(i === month ? S.calBtnActive : {}), ...(hasData && i !== month ? S.calBtnData : {})
+                      }}>{m.slice(0,3)}</button>
+                    );
+                  })}
+                </div>
+
+                <div style={S.expStats}>
+                  <div style={S.expStat}>
+                    <span style={S.expStatLabel}>Toplam</span>
+                    <span style={{...S.expStatVal, color:'var(--text)'}}>₺{fmt(totalExp)}</span>
+                  </div>
+                  <div style={S.expStatDiv}/>
+                  <div style={S.expStat}>
+                    <span style={S.expStatLabel}>Ödenen</span>
+                    <span style={{...S.expStatVal, color:'var(--success)'}}>₺{fmt(paidExp)}</span>
+                  </div>
+                  <div style={S.expStatDiv}/>
+                  <div style={S.expStat}>
+                    <span style={S.expStatLabel}>Kalan</span>
+                    <span style={{...S.expStatVal, color:'var(--danger)'}}>₺{fmt(unpaidExp)}</span>
+                  </div>
+                </div>
+
+                <div style={S.addRow}>
+                  <input type="text" placeholder="Gider adı" value={newExp.name} onChange={e => setNewExp({...newExp, name: e.target.value})} style={S.input}/>
+                  <input type="number" placeholder="₺" value={newExp.amount} onChange={e => setNewExp({...newExp, amount: e.target.value})} style={{...S.input, width:80, flex:'none'}}/>
+                  <label style={S.recToggle}>
+                    <input type="checkbox" checked={newExp.recurring} onChange={e => { setNewExp({...newExp, recurring: e.target.checked}); setShowRecForm(e.target.checked); }}/>
+                    <span>🔄</span>
+                  </label>
+                </div>
+
+                {showRecForm && (
+                  <div style={S.recForm}>
+                    <span style={{fontSize:13, color:'var(--info)'}}>📅 {MONTHS[month]} {year}'dan →</span>
+                    <div style={S.recSelects}>
+                      <select value={newExp.endMonth} onChange={e => setNewExp({...newExp, endMonth: parseInt(e.target.value)})} style={S.select}>
+                        {MONTHS.map((m,i) => <option key={i} value={i}>{m}</option>)}
+                      </select>
+                      <select value={newExp.endYear} onChange={e => setNewExp({...newExp, endYear: parseInt(e.target.value)})} style={S.select}>
+                        {[0,1,2,3,4,5].map(i => <option key={i} value={now.getFullYear()+i}>{now.getFullYear()+i}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                <button onClick={addExp} style={{...S.fullBtn, background: newExp.recurring ? 'var(--info)' : 'var(--success)'}}>
+                  {newExp.recurring ? '🔄 Tekrarlayan Ekle' : '+ Gider Ekle'}
+                </button>
+
+                {allExp.filter(e => !isPaid(e.id, e.isRec)).length > 0 && (
+                  <div style={S.expSection}>
+                    <h4 style={S.expSecTitle}>⏳ Bekleyen ({allExp.filter(e => !isPaid(e.id, e.isRec)).length})</h4>
+                    {allExp.filter(e => !isPaid(e.id, e.isRec)).map(e => (
+                      <div key={`${e.isRec?'r':'o'}-${e.id}`} style={{...S.expItem, borderLeft: e.isRec ? '3px solid var(--info)' : '3px solid var(--success)'}}>
+                        <button onClick={() => togglePaid(e.id, e.isRec)} style={S.checkBtn}>
+                          <span style={S.unchecked}/>
+                        </button>
+                        <span style={S.expIcon}>{getIcon(e.name)}</span>
+                        <div style={{flex:1}}>
+                          <span style={S.expName}>{e.name}</span>
+                          {e.isRec && <span style={S.recBadge}>→ {MONTHS[e.endMonth].slice(0,3)} {e.endYear}</span>}
+                        </div>
+                        <span style={{...S.expAmt, color: e.isRec ? 'var(--info)' : 'var(--success)'}}>₺{fmt(e.amount)}</span>
+                        <button onClick={() => delExp(e.id, e.isRec)} style={S.delBtn}>×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {allExp.filter(e => isPaid(e.id, e.isRec)).length > 0 && (
+                  <div style={S.expSection}>
+                    <h4 style={S.expSecTitle}>✓ Ödenen ({allExp.filter(e => isPaid(e.id, e.isRec)).length})</h4>
+                    {allExp.filter(e => isPaid(e.id, e.isRec)).map(e => (
+                      <div key={`${e.isRec?'r':'o'}-${e.id}`} style={{...S.expItem, ...S.paidItem}}>
+                        <button onClick={() => togglePaid(e.id, e.isRec)} style={S.checkBtn}>
+                          <span style={S.checked}>✓</span>
+                        </button>
+                        <span style={{...S.expIcon, opacity:0.5}}>{getIcon(e.name)}</span>
+                        <span style={S.paidName}>{e.name}</span>
+                        <span style={S.paidAmt}>₺{fmt(e.amount)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {allExp.length === 0 && <p style={S.empty}>{MONTHS[month]} için gider yok</p>}
+
+                <div style={{...S.totalCard, background: unpaidExp > 0 ? 'var(--danger)' : 'var(--success)', marginTop:16}}>
+                  <span>{unpaidExp > 0 ? 'Kalan Ödeme' : '✓ Tamamlandı!'}</span>
+                  <span style={{fontSize:20, fontWeight:700}}>₺{fmt(unpaidExp)}</span>
+                </div>
+              </div>
+            )}
+          </main>
+
+          {/* Tab Bar */}
+          <nav style={S.tabBar}>
+            {[
+              {id:'dashboard', icon:'📊', label:'Özet'},
+              {id:'subs', icon:'📱', label:'Abonelik'},
+              {id:'debts', icon:'📉', label:'Borç'},
+              {id:'receivables', icon:'📈', label:'Alacak'},
+              {id:'expenses', icon:'📋', label:'Gider'}
+            ].map(t => (
+              <button key={t.id} onClick={() => { vibrate(5); setTab(t.id); }} style={{...S.tabItem, ...(tab === t.id ? S.tabActive : {})}}>
+                <span style={S.tabIcon}>{t.icon}</span>
+                <span style={S.tabLabel}>{t.label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+      );
+    }
+
+    const S = {
+      app: { minHeight:'100vh', display:'flex', flexDirection:'column', background:'var(--bg)' },
+      loading: { display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh', background:'var(--bg)' },
+      spinner: { width:32, height:32, border:'3px solid var(--border)', borderTopColor:'var(--accent)', borderRadius:'50%', animation:'spin 1s linear infinite' },
+      header: { display:'flex', justifyContent:'space-between', alignItems:'center', padding:'16px 20px', background:'var(--bg-card)', borderBottom:'1px solid var(--border)' },
+      logo: { fontSize:20, fontWeight:700, margin:0 },
+      date: { fontSize:12, color:'var(--text-muted)', marginTop:2 },
+      themeBtn: { width:40, height:40, borderRadius:12, border:'1px solid var(--border)', background:'var(--bg-secondary)', fontSize:18, cursor:'pointer' },
+      main: { flex:1, padding:'16px 16px 100px', maxWidth:500, margin:'0 auto', width:'100%', overflowY:'auto' },
+
+      statsGrid: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:16 },
+      statCard: { background:'var(--bg-card)', borderRadius:12, padding:12, cursor:'pointer', display:'flex', alignItems:'center', gap:10 },
+      statIcon: { fontSize:22 },
+      statLabel: { fontSize:10, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:0.5 },
+      statValue: { fontSize:14, fontWeight:700, marginTop:2 },
+      card: { background:'var(--bg-card)', borderRadius:16, padding:16, marginBottom:12, border:'1px solid var(--border)' },
+      cardTitle: { fontSize:14, fontWeight:600, margin:0 },
+      chartLabels: { display:'flex', justifyContent:'space-between', marginTop:8 },
+      chartLabel: { fontSize:10, color:'var(--text-muted)' },
+      donutContainer: { display:'flex', alignItems:'center', justifyContent:'space-around', marginTop:12 },
+      donutLegend: { display:'flex', flexDirection:'column', gap:6 },
+      legendItem: { display:'flex', alignItems:'center', gap:8, fontSize:11, color:'var(--text-muted)' },
+      legendDot: { width:10, height:10, borderRadius:5 },
+      totalCard: { borderRadius:14, padding:'16px 20px', color:'#fff', display:'flex', justifyContent:'space-between', alignItems:'center' },
+
+      sectionHeader: { display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 },
+      sectionTitle: { fontSize:20, fontWeight:700, margin:0 },
+      badge: { fontSize:12, fontWeight:600, background:'var(--accent)', color:'#fff', padding:'4px 10px', borderRadius:20 },
+      hint: { fontSize:12, color:'var(--text-muted)', background:'var(--bg-secondary)', padding:'10px 14px', borderRadius:8, marginBottom:12, textAlign:'center' },
+
+      listItem: { display:'flex', alignItems:'center', gap:12, padding:'14px 16px', background:'var(--bg-card)', borderRadius:12, marginBottom:8, border:'1px solid var(--border)' },
+      listIcon: { fontSize:22 },
+      listName: { flex:1, fontSize:15, fontWeight:500 },
+      listRight: { display:'flex', alignItems:'center', gap:10 },
+      listAmt: { fontSize:15, fontWeight:600 },
+      inlineInput: { width:80, padding:'8px 10px', border:'2px solid var(--accent)', borderRadius:8, background:'var(--bg)', color:'var(--text)', fontSize:14, textAlign:'right' },
+      delBtn: { width:28, height:28, borderRadius:8, border:'none', background:'var(--bg-secondary)', color:'var(--text-muted)', fontSize:16, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' },
+
+      addRow: { display:'flex', gap:8, marginBottom:12, padding:12, background:'var(--bg-card)', borderRadius:12, border:'1px solid var(--border)', alignItems:'center' },
+      input: { flex:1, padding:'12px 14px', border:'1px solid var(--border)', borderRadius:10, background:'var(--bg)', color:'var(--text)', fontSize:16 },
+      addBtn: { width:44, height:44, borderRadius:10, border:'none', color:'#fff', fontSize:20, fontWeight:600, cursor:'pointer' },
+      fullBtn: { width:'100%', padding:14, borderRadius:12, border:'none', color:'#fff', fontSize:15, fontWeight:600, cursor:'pointer', marginBottom:16 },
+
+      debtCard: { background:'var(--bg-card)', borderRadius:14, padding:16, marginBottom:12, border:'1px solid var(--border)' },
+      debtTop: { display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12 },
+      debtInfo: { display:'flex', alignItems:'center', gap:12 },
+      debtIcon: { fontSize:28 },
+      debtName: { fontSize:16, fontWeight:600 },
+      debtMeta: { fontSize:11, color:'var(--text-muted)', marginTop:2 },
+      debtRemaining: { fontSize:14, color:'var(--text-muted)', marginBottom:12 },
+      debtActions: { display:'flex', gap:8, marginBottom:8 },
+      actBtn: { flex:1, padding:10, borderRadius:8, border:'1px solid var(--border)', background:'var(--bg)', color:'var(--text)', fontSize:13, fontWeight:500, cursor:'pointer' },
+      actInput: { display:'flex', gap:8, marginTop:8 },
+      confirmBtn: { padding:'12px 16px', borderRadius:8, border:'none', color:'#fff', fontSize:16, fontWeight:600, cursor:'pointer' },
+      cancelBtn: { padding:'12px 14px', borderRadius:8, border:'1px solid var(--border)', background:'var(--bg)', color:'var(--text-muted)', fontSize:16, cursor:'pointer' },
+      txHistory: { marginTop:12, paddingTop:12, borderTop:'1px dashed var(--border)' },
+      txItem: { display:'flex', alignItems:'center', gap:8, padding:'6px 0', fontSize:12 },
+      txType: { fontWeight:600, minWidth:60 },
+      txAmt: { flex:1, fontWeight:500 },
+      txDate: { color:'var(--text-light)' },
+      debtDel: { width:'100%', marginTop:12, padding:10, borderRadius:8, border:'1px solid var(--border)', background:'transparent', color:'var(--danger)', fontSize:13, cursor:'pointer' },
+
+      monthNav: { display:'flex', justifyContent:'space-between', alignItems:'center', padding:14, background:'var(--bg-card)', borderRadius:14, marginBottom:12, border:'1px solid var(--border)' },
+      navBtn: { width:40, height:40, borderRadius:10, border:'1px solid var(--border)', background:'var(--bg)', color:'var(--text)', fontSize:20, cursor:'pointer' },
+      monthTitle: { display:'flex', flexDirection:'column', alignItems:'center' },
+      miniCal: { display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:6, marginBottom:12 },
+      calBtn: { padding:'10px 4px', borderRadius:8, border:'1px solid var(--border)', background:'var(--bg-card)', color:'var(--text-muted)', fontSize:11, fontWeight:600, cursor:'pointer' },
+      calBtnActive: { background:'var(--success)', color:'#fff', border:'1px solid var(--success)' },
+      calBtnData: { borderColor:'var(--success)', color:'var(--success)' },
+      expStats: { display:'flex', justifyContent:'space-around', padding:14, background:'var(--bg-card)', borderRadius:12, marginBottom:12, border:'1px solid var(--border)' },
+      expStat: { display:'flex', flexDirection:'column', alignItems:'center', gap:2 },
+      expStatLabel: { fontSize:10, color:'var(--text-muted)', textTransform:'uppercase' },
+      expStatVal: { fontSize:15, fontWeight:700 },
+      expStatDiv: { width:1, background:'var(--border)' },
+      recToggle: { display:'flex', alignItems:'center', gap:4, cursor:'pointer', fontSize:20 },
+      recForm: { padding:14, marginBottom:12, background:'var(--bg-secondary)', borderRadius:12, border:'1px solid var(--info)' },
+      recSelects: { display:'flex', gap:8, marginTop:8 },
+      select: { padding:'10px 12px', borderRadius:8, border:'1px solid var(--border)', background:'var(--bg-card)', color:'var(--text)', fontSize:14 },
+      expSection: { marginBottom:16 },
+      expSecTitle: { fontSize:13, fontWeight:600, color:'var(--text-muted)', margin:'0 0 10px' },
+      expItem: { display:'flex', alignItems:'center', gap:10, padding:12, background:'var(--bg-card)', borderRadius:10, marginBottom:8, border:'1px solid var(--border)' },
+      checkBtn: { width:28, height:28, border:'none', background:'transparent', cursor:'pointer', padding:0 },
+      unchecked: { display:'block', width:24, height:24, border:'2px solid var(--border)', borderRadius:12 },
+      checked: { display:'flex', alignItems:'center', justifyContent:'center', width:24, height:24, background:'var(--success)', borderRadius:12, color:'#fff', fontSize:14, fontWeight:700, animation:'checkPop 0.3s ease' },
+      expIcon: { fontSize:20 },
+      expName: { fontSize:14, fontWeight:500 },
+      recBadge: { display:'block', fontSize:11, color:'var(--info)', marginTop:2 },
+      expAmt: { fontSize:14, fontWeight:600 },
+      paidItem: { opacity:0.6, background:'var(--bg-secondary)' },
+      paidName: { flex:1, fontSize:14, textDecoration:'line-through', color:'var(--text-muted)' },
+      paidAmt: { fontSize:14, textDecoration:'line-through', color:'var(--text-muted)' },
+      empty: { textAlign:'center', color:'var(--text-light)', padding:'40px 20px', fontSize:14 },
+
+      tabBar: { position:'fixed', bottom:0, left:0, right:0, display:'flex', background:'var(--bg-card)', borderTop:'1px solid var(--border)', paddingBottom:'env(safe-area-inset-bottom)' },
+      tabItem: { flex:1, padding:'10px 0 6px', border:'none', background:'transparent', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:2, color:'var(--text-muted)' },
+      tabActive: { color:'var(--accent)' },
+      tabIcon: { fontSize:20 },
+      tabLabel: { fontSize:9, fontWeight:500 }
+    };
+
+    const style = document.createElement('style');
+    style.textContent = `@keyframes spin{to{transform:rotate(360deg)}}@keyframes checkPop{0%{transform:scale(0)}50%{transform:scale(1.3)}100%{transform:scale(1)}}`;
+    document.head.appendChild(style);
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>

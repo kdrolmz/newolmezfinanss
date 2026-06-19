@@ -5,839 +5,2626 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Finans">
-  <meta name="theme-color" content="#1a1a2e">
+  <meta name="apple-mobile-web-app-title" content="Finans Pro">
+  <meta name="theme-color" content="#f7f8fb">
   <title>Finans Pro</title>
   <style>
     :root {
-      --bg: #f8f7f4; --bg-card: #ffffff; --bg-secondary: #f0eeea;
-      --text: #2d2d2d; --text-muted: #7a7a7a; --text-light: #a0a0a0;
-      --border: #e8e6e1; --accent: #6b5b4f; --success: #4a9b7f;
-      --warning: #d4a853; --danger: #c76b6b; --info: #5b8fb9;
-      --receivable: #7b68a6;
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --bg-end: #edf2ef;
+      --surface: #ffffff;
+      --surface-soft: #f3f6f8;
+      --surface-strong: #eef2f5;
+      --ink: #111419;
+      --ink-2: #252a32;
+      --muted: #626d7c;
+      --faint: #9aa4b2;
+      --line: rgba(20, 24, 32, 0.10);
+      --line-strong: rgba(20, 24, 32, 0.16);
+      --gold: #b88a2a;
+      --gold-soft: #f7edcf;
+      --green: #0f9f6e;
+      --green-soft: #e2f7ef;
+      --red: #c93445;
+      --red-soft: #fde8eb;
+      --blue: #174ea6;
+      --shadow: 0 18px 50px rgba(27, 34, 45, 0.10);
+      --shadow-soft: 0 6px 18px rgba(27, 34, 45, 0.055);
+      --radius: 18px;
+      --tab-height: 66px;
     }
-    .dark {
-      --bg: #121218; --bg-card: #1e1e28; --bg-secondary: #252532;
-      --text: #f0f0f0; --text-muted: #8a8a9a; --text-light: #5a5a6a;
-      --border: #2a2a3a; --accent: #9b8b7f; --receivable: #9b88c4;
+
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0c0d10;
+      --bg-end: #171916;
+      --surface: #171a20;
+      --surface-soft: #20242b;
+      --surface-strong: #272c34;
+      --ink: #f3f5f7;
+      --ink-2: #d9dee5;
+      --muted: #a3adba;
+      --faint: #717b89;
+      --line: rgba(255, 255, 255, 0.10);
+      --line-strong: rgba(255, 255, 255, 0.18);
+      --gold: #d4aa48;
+      --gold-soft: #332811;
+      --green: #31c48d;
+      --green-soft: #102a21;
+      --red: #ee6572;
+      --red-soft: #34181d;
+      --blue: #72a6ff;
+      --shadow: 0 18px 52px rgba(0, 0, 0, 0.42);
+      --shadow-soft: 0 8px 26px rgba(0, 0, 0, 0.28);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    html, body, #root { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif; background: var(--bg); color: var(--text); }
-    body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
-    input, select { font-size: 16px !important; font-family: inherit; }
-    ::-webkit-scrollbar { display: none; }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes checkPop { 0% { transform: scale(0); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
-    .fade-up { animation: fadeUp 0.35s ease-out forwards; }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body,
+    #root {
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, var(--bg) 0%, var(--bg) 46%, var(--bg-end) 100%);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      overflow-x: hidden;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    input {
+      min-width: 0;
+      font-size: 16px;
+    }
+
+    ::-webkit-scrollbar {
+      display: none;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulseCheck {
+      0% { transform: scale(0.88); }
+      65% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      width: 100%;
+      padding: 10px 16px 9px;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      line-height: 1;
+    }
+
+    .brand-title strong {
+      font-size: 19px;
+      font-weight: 680;
+      letter-spacing: 0;
+    }
+
+    .brand-title span {
+      color: var(--gold);
+      font-size: 19px;
+      font-weight: 680;
+    }
+
+    .top-sub {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 10.5px;
+      font-weight: 450;
+    }
+
+    .privacy-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--green) 14%, transparent);
+      flex: 0 0 auto;
+    }
+
+    .theme-btn {
+      width: 38px;
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--ink);
+      background: var(--surface-soft);
+      box-shadow: var(--shadow-soft);
+      font-size: 17px;
+    }
+
+    .main {
+      width: 100%;
+      max-width: 452px;
+      margin: 0 auto;
+      padding: 10px 12px calc(var(--tab-height) + 18px + env(safe-area-inset-bottom));
+      animation: fadeUp 0.28s ease both;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 196px;
+      padding: 19px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 26px;
+      background:
+        linear-gradient(145deg, #111419 0%, #252a32 58%, #6f541e 130%);
+      color: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 34%;
+      background:
+        linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.08) 100%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .hero h2 {
+      margin-top: 10px;
+      max-width: 270px;
+      font-size: 25px;
+      line-height: 1.08;
+      letter-spacing: 0;
+      font-weight: 850;
+    }
+
+    .hero p {
+      max-width: 300px;
+      margin-top: 10px;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 520;
+    }
+
+    .dial {
+      width: 78px;
+      height: 78px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background:
+        conic-gradient(#ffffff calc(var(--p) * 1%), rgba(255, 255, 255, 0.20) 0);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+    }
+
+    .dial-inner {
+      width: 60px;
+      height: 60px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: rgba(17, 20, 25, 0.72);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .hero-metrics {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-top: 17px;
+    }
+
+    .hero-metric {
+      min-height: 58px;
+      padding: 10px 9px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.10);
+    }
+
+    .hero-metric span,
+    .metric-card span,
+    .payment-label,
+    .micro-label {
+      display: block;
+      color: var(--faint);
+      font-size: 8.5px;
+      font-weight: 520;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .hero-metric span {
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    .hero-metric strong {
+      display: block;
+      margin-top: 5px;
+      color: #fff;
+      font-size: 15px;
+      line-height: 1.12;
+      font-weight: 850;
+      word-break: break-word;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 9px;
+      margin-top: 11px;
+    }
+
+    .metric-card {
+      min-height: 78px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 11px 10px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .metric-card strong {
+      display: block;
+      margin-top: 6px;
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.08;
+      font-weight: 850;
+      word-break: break-word;
+    }
+
+    .metric-card small {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 650;
+    }
+
+    .brand-rail {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(82px, 1fr);
+      gap: 8px;
+      margin-top: 11px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .brand-chip {
+      min-height: 66px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
+      text-align: center;
+    }
+
+    .brand-chip > span:last-child {
+      max-width: 76px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.05;
+      font-weight: 800;
+    }
+
+    .brand-mark {
+      position: relative;
+      flex: 0 0 auto;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 28px;
+      overflow: hidden;
+      border-radius: 8px;
+      color: #fff;
+      box-shadow:
+        inset 0 -5px 10px rgba(0, 0, 0, 0.14),
+        0 6px 14px rgba(0, 0, 0, 0.08);
+    }
+
+    .brand-mark.has-logo {
+      padding: 4px;
+      border: 1px solid color-mix(in srgb, var(--line-strong) 80%, transparent);
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 6px 14px rgba(27, 34, 45, 0.07);
+    }
+
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      left: 6px;
+      right: 6px;
+      bottom: 4px;
+      height: 1px;
+      border-radius: 999px;
+      background: currentColor;
+      opacity: 0.26;
+    }
+
+    .brand-mark.has-logo::after {
+      display: none;
+    }
+
+    .brand-mark.xl {
+      width: 62px;
+      height: 38px;
+      border-radius: 10px;
+    }
+
+    .brand-mark.md {
+      width: 48px;
+      height: 28px;
+      border-radius: 8px;
+    }
+
+    .brand-mark.sm {
+      width: 42px;
+      height: 26px;
+      border-radius: 8px;
+    }
+
+    .brand-mark.xs {
+      width: 34px;
+      height: 24px;
+      border-radius: 7px;
+    }
+
+    .brand-main {
+      position: relative;
+      z-index: 1;
+      max-width: 44px;
+      font-size: 8.8px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: 0;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .brand-logo {
+      position: relative;
+      z-index: 2;
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .brand-mark.has-logo .brand-main,
+    .brand-mark.has-logo .brand-sub {
+      display: none;
+    }
+
+    .brand-mark.xl .brand-main {
+      max-width: 58px;
+      font-size: 10.5px;
+    }
+
+    .brand-mark.sm .brand-main {
+      max-width: 44px;
+      font-size: 9.5px;
+    }
+
+    .brand-mark.xs .brand-main {
+      max-width: 30px;
+      font-size: 8px;
+    }
+
+    .brand-sub {
+      position: relative;
+      z-index: 1;
+      margin-top: 2px;
+      font-size: 6px;
+      line-height: 1;
+      font-weight: 800;
+      opacity: 0.78;
+      text-transform: uppercase;
+    }
+
+    .brand-mark.sm .brand-sub,
+    .brand-mark.xs .brand-sub {
+      display: none;
+    }
+
+    .brand-akbank { background: #e30613; }
+    .brand-garanti { background: linear-gradient(145deg, #007a4d 0%, #005f3b 100%); }
+    .brand-isbank { background: #0b3a82; }
+    .brand-eminevim { background: linear-gradient(145deg, #008457 0%, #006643 100%); }
+    .brand-albaraka { background: #00a19a; }
+    .brand-sgk { background: linear-gradient(145deg, #e31f26 0%, #2451a3 100%); }
+    .brand-health { background: linear-gradient(145deg, #13a37f 0%, #0a7563 100%); }
+    .brand-enpara { background: #7623bf; }
+    .brand-ziraat { background: #d71920; }
+    .brand-yapikredi { background: #004990; }
+    .brand-halkbank { background: #006bb6; }
+    .brand-vakif { background: #e0a313; color: #16191f; }
+    .brand-qnb { background: #5e2a84; }
+    .brand-teb { background: #00a650; }
+    .brand-deniz { background: #d71920; }
+    .brand-ing { background: #ff6200; }
+    .brand-generic { background: linear-gradient(145deg, #303741 0%, #626b78 100%); }
+    .brand-gold { background: linear-gradient(145deg, #c39831 0%, #7b5b18 100%); }
+    .brand-utility { background: linear-gradient(145deg, #0786a0 0%, #155e75 100%); }
+    .brand-home { background: linear-gradient(145deg, #334155 0%, #111827 100%); }
+    .brand-residence { background: linear-gradient(145deg, #334155 0%, #111827 100%); }
+    .brand-mark.brand-home .brand-main,
+    .brand-mark.brand-residence .brand-main,
+    .brand-mark.brand-home .brand-sub,
+    .brand-mark.brand-residence .brand-sub {
+      display: none;
+    }
+    .brand-mark.brand-home::before,
+    .brand-mark.brand-residence::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 43%;
+      z-index: 1;
+      width: 21px;
+      height: 21px;
+      border-left: 2px solid currentColor;
+      border-top: 2px solid currentColor;
+      border-radius: 3px 0 0 0;
+      transform: translate(-50%, -50%) rotate(45deg);
+      background: transparent;
+    }
+    .brand-mark.brand-home::after,
+    .brand-mark.brand-residence::after {
+      display: block;
+      left: 50%;
+      right: auto;
+      bottom: 5px;
+      width: 22px;
+      height: 15px;
+      border: 2px solid currentColor;
+      border-top: 0;
+      border-radius: 2px 2px 4px 4px;
+      background:
+        linear-gradient(currentColor, currentColor) center bottom / 5px 8px no-repeat;
+      opacity: 1;
+      transform: translateX(-50%);
+    }
+    .brand-mark.brand-garanti .brand-main,
+    .brand-mark.brand-albaraka .brand-main,
+    .brand-mark.brand-eminevim .brand-main,
+    .brand-mark.brand-health .brand-main {
+      font-size: 8px;
+    }
+    .brand-mark.brand-garanti::before {
+      content: "";
+      position: absolute;
+      top: 4px;
+      right: 5px;
+      width: 5px;
+      height: 5px;
+      border-radius: 7px 7px 7px 1px;
+      background: #7cc242;
+      transform: rotate(-28deg);
+      opacity: 0.9;
+    }
+
+    .priority-card,
+    .chart-card,
+    .toolbar-card,
+    .summary-strip,
+    .add-panel,
+    .saving-hero,
+    .saving-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .priority-card {
+      margin-top: 12px;
+      padding: 14px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.2;
+      font-weight: 560;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .section-title strong {
+      color: var(--ink);
+      font-size: 10.5px;
+      font-weight: 560;
+      text-transform: none;
+    }
+
+    .priority-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .priority-item {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px;
+      border-radius: 14px;
+      background: var(--surface-soft);
+    }
+
+    .priority-item h4 {
+      display: -webkit-box;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 13.5px;
+      line-height: 1.18;
+      font-weight: 800;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+    }
+
+    .priority-item p {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .priority-item strong {
+      margin-left: auto;
+      color: var(--red);
+      font-size: 13px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .chart-card {
+      margin-top: 12px;
+      padding: 14px;
+    }
+
+    .bars {
+      display: flex;
+      align-items: end;
+      gap: 8px;
+      height: 92px;
+      padding-top: 8px;
+    }
+
+    .bar-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: end;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .bar {
+      width: 100%;
+      min-height: 5px;
+      border-radius: 7px 7px 3px 3px;
+      background: var(--surface-strong);
+      overflow: hidden;
+    }
+
+    .bar.active {
+      background: linear-gradient(180deg, var(--ink) 0%, var(--gold) 100%);
+    }
+
+    .bar-label {
+      color: var(--faint);
+      font-size: 10.5px;
+      font-weight: 800;
+    }
+
+    .toolbar-card {
+      display: grid;
+      grid-template-columns: 34px 1fr 34px;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+    }
+
+    .month-center {
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    .month-center strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 560;
+    }
+
+    .month-center span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 420;
+    }
+
+    .nav-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-soft);
+      color: var(--ink);
+      font-size: 19px;
+      line-height: 1;
+      font-weight: 700;
+    }
+
+    .month-strip {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .month-chip {
+      min-height: 28px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--surface);
+      color: var(--faint);
+      font-size: 9px;
+      font-weight: 520;
+    }
+
+    .month-chip.has-data {
+      border-color: color-mix(in srgb, var(--gold) 58%, var(--line));
+      color: var(--gold);
+    }
+
+    .month-chip.active {
+      border-color: var(--ink);
+      background: var(--ink);
+      color: var(--surface);
+    }
+
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .summary-cell {
+      min-height: 54px;
+      padding: 8px 4px;
+      background: var(--surface);
+      text-align: center;
+    }
+
+    .summary-cell + .summary-cell {
+      border-left: 1px solid var(--line);
+    }
+
+    .summary-cell span {
+      display: block;
+      color: var(--faint);
+      font-size: 7.8px;
+      font-weight: 520;
+      text-transform: uppercase;
+    }
+
+    .summary-cell strong {
+      display: block;
+      margin-top: 5px;
+      color: var(--ink);
+      font-size: 11.2px;
+      line-height: 1.08;
+      font-weight: 540;
+      word-break: break-word;
+    }
+
+    .summary-single {
+      grid-template-columns: 1fr;
+    }
+
+    .summary-single .summary-cell {
+      min-height: 68px;
+      padding: 11px 12px;
+      text-align: left;
+    }
+
+    .summary-single .summary-cell strong {
+      margin-top: 6px;
+      font-size: 20px;
+      font-weight: 560;
+    }
+
+    .summary-cell small {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.2;
+      font-weight: 430;
+    }
+
+    .payment-section {
+      margin-top: 11px;
+    }
+
+    .payment-grid {
+      display: grid;
+      gap: 7px;
+    }
+
+    .payment-card {
+      --brand: var(--gold);
+      height: 124px;
+      display: grid;
+      grid-template-rows: auto auto auto;
+      gap: 7px;
+      overflow: hidden;
+      padding: 9px;
+      border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+      border-top: 2px solid var(--red);
+      border-radius: 14px;
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--red-soft) 34%, var(--surface)) 0%, var(--surface) 40%);
+      box-shadow: 0 9px 24px rgba(27, 34, 45, 0.065);
+    }
+
+    .payment-card.is-paid {
+      opacity: 0.76;
+      border-top-color: var(--green);
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--green-soft) 50%, var(--surface)) 0%, var(--surface) 64%);
+    }
+
+    .payment-top,
+    .payment-bottom,
+    .payment-middle {
+      min-width: 0;
+    }
+
+    .payment-top {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .payment-title {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .payment-title h3 {
+      display: -webkit-box;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 11.4px;
+      line-height: 1.14;
+      font-weight: 520;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+    }
+
+    .payment-title p {
+      display: -webkit-box;
+      overflow: hidden;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 8.8px;
+      line-height: 1.18;
+      font-weight: 420;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+    }
+
+    .due-pill {
+      flex: 0 0 auto;
+      min-width: 42px;
+      padding: 4px 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-soft);
+      color: var(--muted);
+      font-size: 8.5px;
+      font-weight: 520;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .payment-middle {
+      min-height: 38px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      align-items: center;
+      padding: 7px 8px;
+      border: 1px solid color-mix(in srgb, var(--line) 68%, transparent);
+      border-radius: 10px;
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--surface-soft) 80%, var(--surface)) 0%, var(--surface) 100%);
+    }
+
+    .payment-stat {
+      min-width: 0;
+    }
+
+    .payment-stat + .payment-stat {
+      padding-left: 8px;
+      border-left: 1px solid var(--line);
+    }
+
+    .debt-value {
+      display: block;
+      margin-top: 2px;
+      color: var(--red);
+      font-size: 11.8px;
+      line-height: 1.05;
+      font-weight: 520;
+      word-break: break-word;
+    }
+
+    .debt-value.good {
+      color: var(--green);
+    }
+
+    .progress-line {
+      flex: 0 0 54px;
+      height: 4px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: var(--line);
+    }
+
+    .progress-line i {
+      display: block;
+      width: var(--w);
+      height: 100%;
+      border-radius: inherit;
+      background: var(--brand);
+    }
+
+    .status-chip {
+      flex: 0 0 auto;
+      padding: 5px 7px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--brand) 13%, var(--surface));
+      color: var(--brand);
+      font-size: 8.5px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .payment-bottom {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto auto;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .amount-block {
+      min-width: 0;
+    }
+
+    .amount {
+      display: block;
+      margin-top: 2px;
+      color: var(--ink);
+      font-size: 11.8px;
+      line-height: 1;
+      font-weight: 520;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .is-paid .amount {
+      color: var(--green);
+    }
+
+    .pay-btn,
+    .icon-btn {
+      height: 27px;
+      border-radius: 9px;
+      border: 1px solid var(--line-strong);
+      background: var(--surface);
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .pay-btn {
+      min-width: 52px;
+      padding: 0 8px;
+      font-size: 9.6px;
+    }
+
+    .pay-btn.paid {
+      border-color: var(--green);
+      background: var(--green);
+      color: #fff;
+      animation: pulseCheck 0.22s ease;
+    }
+
+    .icon-btn {
+      width: 27px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    .icon-btn.delete {
+      color: var(--red);
+    }
+
+    .edit-card {
+      height: auto;
+      min-height: 118px;
+      gap: 10px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(82px, 1fr);
+      gap: 7px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 520;
+      text-transform: uppercase;
+    }
+
+    .input {
+      width: 100%;
+      height: 38px;
+      padding: 0 11px;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      outline: none;
+      background: var(--surface-soft);
+      color: var(--ink);
+      font-weight: 430;
+    }
+
+    .input:focus {
+      border-color: color-mix(in srgb, var(--gold) 70%, var(--line-strong));
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 18%, transparent);
+    }
+
+    .form-actions {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 7px;
+      margin-top: 2px;
+    }
+
+    .primary-btn,
+    .ghost-btn,
+    .add-btn {
+      height: 40px;
+      border-radius: 11px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .primary-btn {
+      border: 0;
+      background: var(--ink);
+      color: var(--surface);
+    }
+
+    .ghost-btn {
+      min-width: 84px;
+      padding: 0 12px;
+      border: 1px solid var(--line-strong);
+      background: var(--surface);
+      color: var(--muted);
+    }
+
+    .add-btn {
+      width: 100%;
+      margin-top: 11px;
+      border: 1px dashed var(--line-strong);
+      background: color-mix(in srgb, var(--surface) 72%, var(--gold-soft));
+      color: var(--ink);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .add-panel {
+      margin-top: 11px;
+      padding: 10px;
+    }
+
+    .brand-preview {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 9px;
+      padding: 8px;
+      border-radius: 12px;
+      background: var(--surface-soft);
+    }
+
+    .brand-preview strong {
+      display: block;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .brand-preview span.preview-sub {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 46px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .toggle-row input {
+      width: 19px;
+      height: 19px;
+      accent-color: var(--ink);
+    }
+
+    .debt-card {
+      margin-bottom: 8px;
+      padding: 9px;
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--ink);
+      border-radius: 12px;
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .debt-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .debt-copy {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .debt-copy h3 {
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 12px;
+      line-height: 1.12;
+      font-weight: 560;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .debt-copy p {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.15;
+      font-weight: 420;
+    }
+
+    .debt-remain {
+      color: var(--red);
+      font-size: 13px;
+      line-height: 1;
+      font-weight: 520;
+      white-space: nowrap;
+    }
+
+    .debt-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto auto;
+      gap: 6px;
+      margin-top: 8px;
+      align-items: center;
+    }
+
+    .small-btn {
+      height: 29px;
+      padding: 0 8px;
+      border: 1px solid var(--line-strong);
+      border-radius: 9px;
+      background: var(--surface-soft);
+      color: var(--ink);
+      font-size: 10px;
+      font-weight: 480;
+    }
+
+    .small-btn.green {
+      border-color: color-mix(in srgb, var(--green) 55%, var(--line));
+      color: var(--green);
+    }
+
+    .small-btn.red {
+      border-color: color-mix(in srgb, var(--red) 45%, var(--line));
+      color: var(--red);
+    }
+
+    .debt-action-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 6px;
+      margin-top: 7px;
+    }
+
+    .debt-edit-card {
+      height: auto;
+      min-height: 0;
+    }
+
+    .empty {
+      padding: 42px 20px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.45;
+      font-weight: 650;
+    }
+
+    .saving-hero {
+      padding: 18px;
+      background:
+        linear-gradient(145deg, #111419 0%, #684f19 100%);
+      color: #fff;
+    }
+
+    .saving-hero span {
+      color: rgba(255, 255, 255, 0.68);
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+
+    .saving-hero strong {
+      display: block;
+      margin-top: 7px;
+      font-size: 31px;
+      line-height: 1;
+      font-weight: 900;
+      word-break: break-word;
+    }
+
+    .saving-hero p {
+      margin-top: 9px;
+      color: rgba(255, 255, 255, 0.74);
+      font-size: 12.5px;
+      line-height: 1.42;
+      font-weight: 600;
+    }
+
+    .saving-grid {
+      display: grid;
+      gap: 12px;
+      margin-top: 13px;
+    }
+
+    .saving-card {
+      min-height: 156px;
+      padding: 14px;
+    }
+
+    .saving-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .saving-head h3 {
+      display: -webkit-box;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.16;
+      font-weight: 850;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+    }
+
+    .saving-head p {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .saving-value-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 8px;
+      align-items: end;
+      margin-top: 12px;
+    }
+
+    .square-btn {
+      width: 46px;
+      height: 46px;
+      border: 0;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 850;
+    }
+
+    .square-btn.plus { background: var(--green); }
+    .square-btn.minus { background: var(--red); }
+
+    .tabbar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 12;
+      height: calc(var(--tab-height) + env(safe-area-inset-bottom));
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      padding: 7px 12px calc(7px + env(safe-area-inset-bottom));
+      border-top: 1px solid var(--line);
+      background: color-mix(in srgb, var(--surface) 93%, transparent);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      box-shadow: 0 -12px 35px rgba(18, 24, 34, 0.08);
+    }
+
+    .tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      border: 0;
+      border-radius: 16px;
+      background: transparent;
+      color: var(--faint);
+      font-size: 10px;
+      font-weight: 520;
+    }
+
+    .tab i {
+      display: grid;
+      place-items: center;
+      width: 23px;
+      height: 23px;
+      border-radius: 8px;
+      background: transparent;
+      color: inherit;
+      font-style: normal;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .tab.active {
+      color: var(--ink);
+      background: var(--surface-soft);
+    }
+
+    .tab.active i {
+      background: var(--ink);
+      color: var(--surface);
+    }
+
+    .color-red { color: var(--red) !important; }
+    .color-green { color: var(--green) !important; }
+    .color-gold { color: var(--gold) !important; }
+
+    @media (max-width: 430px) {
+      .topbar {
+        padding: 12px 14px 10px;
+      }
+
+      .main {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .hero {
+        min-height: 190px;
+        padding: 17px;
+        border-radius: 24px;
+      }
+
+      .hero h2 {
+        font-size: 23px;
+        max-width: 235px;
+      }
+
+      .dial {
+        width: 72px;
+        height: 72px;
+      }
+
+      .dial-inner {
+        width: 55px;
+        height: 55px;
+        font-size: 13px;
+      }
+
+      .metric-card {
+        min-height: 76px;
+        padding: 10px 9px;
+      }
+
+      .metric-card strong,
+      .metric-card strong {
+        font-size: 14px;
+      }
+
+      .summary-cell {
+        min-height: 52px;
+        padding: 8px 3px;
+      }
+
+      .summary-cell span {
+        font-size: 7.2px;
+      }
+
+      .summary-cell strong {
+        font-size: 10.4px;
+      }
+
+      .summary-single .summary-cell strong {
+        font-size: 19px;
+      }
+
+      .payment-card {
+        height: 124px;
+        padding: 9px;
+        gap: 7px;
+      }
+
+      .brand-mark.md {
+        width: 48px;
+        height: 28px;
+      }
+
+      .payment-title h3 {
+        font-size: 11.3px;
+      }
+
+      .payment-bottom {
+        grid-template-columns: minmax(0, 1fr) auto auto auto;
+        gap: 6px;
+      }
+
+      .pay-btn {
+        min-width: 52px;
+        padding: 0 7px;
+      }
+
+      .icon-btn {
+        width: 28px;
+      }
+
+      .amount {
+        font-size: 12.5px;
+      }
+    }
   </style>
 </head>
 <body>
   <div id="root"></div>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script type="text/babel">
-    const { useState, useEffect, useCallback, useMemo } = React;
+  <script>
+    (function () {
+      "use strict";
 
-    const MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
-    const ICONS = {
-      netflix:'🎬',hbo:'📺',amazon:'📦',canva:'🎨',chatgpt:'🤖',gemini:'✨',claude:'🧠',
-      apple:'🎵',spotify:'🎧',youtube:'▶️',adobe:'🅰️',antivirus:'🛡️',disney:'🏰',
-      dropbox:'📁',icloud:'☁️',linkedin:'💼',microsoft:'🪟',notion:'📝',figma:'🎯',
-      elektrik:'⚡',su:'💧',doğalgaz:'🔥',internet:'🌐',telefon:'📱',market:'🛒',
-      kira:'🏠',benzin:'⛽',yakıt:'⛽',yemek:'🍽️',ulaşım:'🚌',sağlık:'🏥',eğitim:'📚',
-      sigorta:'🛡️',aidat:'🏢',banka:'🏦',kredi:'💳'
-    };
-    const DEFAULT_SUBS = [
-      {id:1,name:'Netflix',amount:0},{id:2,name:'HBO Max',amount:0},{id:3,name:'Amazon Prime',amount:0},
-      {id:4,name:'Canva',amount:0},{id:5,name:'ChatGPT',amount:0},{id:6,name:'Gemini',amount:0},
-      {id:7,name:'Claude',amount:0},{id:8,name:'Apple Music',amount:0},{id:9,name:'Antivirus',amount:0},{id:10,name:'Adobe',amount:0}
-    ];
+      var root = document.getElementById("root");
+      var now = new Date();
+      var MONTHS = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+      var M3 = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
+      var ADV = { avgIncome: 150000, cashAdvance: 250000, cashAdvanceRate: 0.0425 };
+      var KNOWN_BRANDS = ["Akbank", "Garanti BBVA", "Emin Evim", "Albaraka Türk", "Türkiye İş Bankası", "Enpara", "Rezidans", "SGK", "Sağlık Sigortası"];
 
-    const storage = {
-      get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
-      set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
-    };
-    const getIcon = name => {
-      const l = name.toLowerCase();
-      for (const [k, v] of Object.entries(ICONS)) if (l.includes(k)) return v;
-      return '💳';
-    };
-    const fmt = n => n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
-    const monthNum = (y, m) => y * 12 + m;
-    const vibrate = (p = 10) => navigator.vibrate?.(p);
+      var storage = {
+        get: function (key) {
+          try {
+            return JSON.parse(localStorage.getItem(key));
+          } catch (err) {
+            return null;
+          }
+        },
+        set: function (key, value) {
+          try {
+            localStorage.setItem(key, JSON.stringify(value));
+          } catch (err) {}
+        }
+      };
 
-    const MiniChart = ({ data, color, height = 40 }) => {
-      const max = Math.max(...data, 1);
-      return (
-        <svg width="100%" height={height} style={{display:'block'}}>
-          <defs>
-            <linearGradient id={`grad-${color}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity="0.3"/>
-              <stop offset="100%" stopColor={color} stopOpacity="0"/>
-            </linearGradient>
-          </defs>
-          <path d={`M0,${height} ${data.map((v,i) => `L${(i/(data.length-1))*100}%,${height - (v/max)*(height-5)}`).join(' ')} L100%,${height} Z`} fill={`url(#grad-${color})`}/>
-          <path d={data.map((v,i) => `${i===0?'M':'L'}${(i/(data.length-1))*100}%,${height - (v/max)*(height-5)}`).join(' ')} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round"/>
-        </svg>
-      );
-    };
+      var state = {
+        dark: storage.get("dark-mode") === true,
+        tab: "expenses",
+        month: now.getMonth(),
+        year: now.getFullYear(),
+        oneTime: storage.get("fp-onetime") || {},
+        recurring: storage.get("fp-recurring"),
+        paid: storage.get("fp-paid") || {},
+        addOpen: false,
+        editKey: null,
+        personalDebts: storage.get("fp-person-debts"),
+        debtAddOpen: false,
+        debtAction: {},
+        debtEditKey: null
+      };
 
-    const DonutChart = ({ segments, size = 120 }) => {
-      const total = segments.reduce((s, seg) => s + seg.value, 0) || 1;
-      let cumulative = 0;
-      const r = 40, c = 2 * Math.PI * r;
-      return (
-        <svg width={size} height={size} viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r={r} fill="none" stroke="var(--border)" strokeWidth="12"/>
-          {segments.map((seg, i) => {
-            const pct = seg.value / total;
-            const offset = c * (1 - cumulative);
-            cumulative += pct;
-            return <circle key={i} cx="50" cy="50" r={r} fill="none" stroke={seg.color} strokeWidth="12" 
-              strokeDasharray={`${c * pct} ${c}`} strokeDashoffset={offset} 
-              transform="rotate(-90 50 50)" style={{transition:'all 0.5s ease'}}/>;
-          })}
-          <text x="50" y="50" textAnchor="middle" dy="0.35em" fontSize="14" fontWeight="700" fill="var(--text)">
-            ₺{fmt(total).split(',')[0]}
-          </text>
-        </svg>
-      );
-    };
+      if (!state.recurring) {
+        state.recurring = seedRecurring();
+        storage.set("fp-recurring", state.recurring);
+      }
 
-    const ProgressRing = ({ progress, size = 44, color }) => {
-      const r = 18, c = 2 * Math.PI * r;
-      return (
-        <svg width={size} height={size} viewBox="0 0 44 44">
-          <circle cx="22" cy="22" r={r} fill="none" stroke="var(--border)" strokeWidth="4"/>
-          <circle cx="22" cy="22" r={r} fill="none" stroke={color} strokeWidth="4" 
-            strokeDasharray={c} strokeDashoffset={c * (1 - progress / 100)} 
-            transform="rotate(-90 22 22)" strokeLinecap="round" style={{transition:'stroke-dashoffset 0.5s ease'}}/>
-          <text x="22" y="22" textAnchor="middle" dy="0.35em" fontSize="10" fontWeight="600" fill="var(--text)">
-            {progress.toFixed(0)}%
-          </text>
-        </svg>
-      );
-    };
+      state.recurring = ensureRequiredPayments(state.recurring);
+      storage.set("fp-recurring", state.recurring);
 
-    function App() {
-      const [dark, setDark] = useState(() => storage.get('dark-mode') ?? false);
-      const [tab, setTab] = useState('dashboard');
-      const [subs, setSubs] = useState([]);
-      const [debts, setDebts] = useState([]);
-      const [receivables, setReceivables] = useState([]); // YENİ: Alacaklar
-      const [oneTime, setOneTime] = useState({});
-      const [recurring, setRecurring] = useState([]);
-      const [paid, setPaid] = useState({});
-      const [loading, setLoading] = useState(true);
+      if (!state.personalDebts) {
+        state.personalDebts = seedPersonalDebts();
+        storage.set("fp-person-debts", state.personalDebts);
+      }
 
-      const now = new Date();
-      const [month, setMonth] = useState(now.getMonth());
-      const [year, setYear] = useState(now.getFullYear());
-      const monthKey = `${year}-${month}`;
+      function seedRecurring() {
+        var sm = now.getMonth();
+        var sy = now.getFullYear();
+        var n = 0;
+        function id() {
+          n += 1;
+          return Date.now() + n;
+        }
+        function mk(name, total, amount, day) {
+          return {
+            id: id(),
+            name: name,
+            amount: amount,
+            total: total,
+            day: day,
+            startMonth: sm,
+            startYear: sy,
+            endMonth: 11,
+            endYear: sy + 8
+          };
+        }
+        return [
+          mk("Akbank 2 Kredi", 377813, 29110, 3),
+          mk("Akbank 1 Kredi", 811071, 30000, 3),
+          mk("Garanti Kredi", 410476, 35200, 7),
+          mk("İş Bankası Kredi", 79000, 15800, 16),
+          mk("Albaraka Türk Kredi", 50000, 12500, 9),
+          mk("Akbank Nakit Hesap", 210000, 25000, 3),
+          mk("Enpara Nakit Avans", 59000, 10000, 20),
+          mk("Akbank Kredi Kartı", 85000, 12000, 23),
+          mk("Garanti Kredi Kartı", 260000, 30000, 5),
+          mk("Enpara Kredi Kartı", 71250, 15000, 10),
+          mk("Özüm Kredi Kartı", null, 7500, 5),
+          mk("Garanti Bankası Kart Troy", null, 5000, 18)
+        ];
+      }
 
-      const [newSub, setNewSub] = useState({name:'',amount:''});
-      const [newDebt, setNewDebt] = useState({name:'',total:''});
-      const [newReceivable, setNewReceivable] = useState({name:'',total:''}); // YENİ
-      const [newExp, setNewExp] = useState({name:'',amount:'',recurring:false,endMonth:now.getMonth(),endYear:now.getFullYear()+1});
-      const [debtAction, setDebtAction] = useState({});
-      const [recAction, setRecAction] = useState({}); // YENİ: Alacak aksiyonları
-      const [editSub, setEditSub] = useState(null);
-      const [showRecForm, setShowRecForm] = useState(false);
+      function ensureRequiredPayments(list) {
+        var next = (list || []).slice();
+        var june2026 = { startMonth: 5, startYear: 2026 };
+        function upsert(match, patcher) {
+          var index = next.findIndex(function (item) {
+            return match(normalizeText(item.name), item);
+          });
+          var current = index > -1 ? next[index] : { id: Date.now() + next.length + 5000 };
+          var patch = typeof patcher === "function" ? patcher(current) : patcher;
+          var merged = Object.assign({}, current, patch);
+          if (index > -1) next[index] = merged;
+          else next.push(merged);
+        }
+        function updateMatches(match, patcher) {
+          next = next.map(function (item) {
+            if (!match(normalizeText(item.name), item)) return item;
+            var patch = typeof patcher === "function" ? patcher(item) : patcher;
+            return Object.assign({}, item, patch);
+          });
+        }
 
-      useEffect(() => {
-        document.documentElement.className = dark ? 'dark' : '';
-        storage.set('dark-mode', dark);
-      }, [dark]);
+        upsert(function (n, item) {
+          return /akbank/.test(n) && !/kart|nakit|avans|hesap/.test(n) &&
+            (/konut|akbank 1|buyuk|buyuk kredi/.test(n) || Number(item.total || 0) >= 400000 || Number(item.amount || 0) === 30000);
+        }, function (item) {
+          return {
+            name: "Akbank 1 Kredi",
+            amount: Number(item.amount) || 30000,
+            total: 811071,
+            day: Number(item.day) || 3,
+            startMonth: item.startMonth == null ? june2026.startMonth : item.startMonth,
+            startYear: item.startYear || june2026.startYear,
+            endMonth: item.endMonth == null ? 11 : item.endMonth,
+            endYear: item.endYear || 2034
+          };
+        });
+        upsert(function (n, item) {
+          return /akbank/.test(n) && !/kart|nakit|avans|hesap|konut/.test(n) &&
+            (/akbank 2|orta|akbank kredi/.test(n) || (Number(item.amount || 0) === 29110 && Number(item.total || 0) < 500000));
+        }, function (item) {
+          return {
+            name: "Akbank 2 Kredi",
+            amount: Number(item.amount) || 29110,
+            total: 377813,
+            day: Number(item.day) || 3,
+            startMonth: item.startMonth == null ? june2026.startMonth : item.startMonth,
+            startYear: item.startYear || june2026.startYear,
+            endMonth: item.endMonth == null ? 11 : item.endMonth,
+            endYear: item.endYear || 2034
+          };
+        });
+        upsert(function (n) { return /garanti/.test(n) && !/kart|troy|ozum/.test(n); }, function (item) {
+          return {
+            name: "Garanti Kredi",
+            amount: Number(item.amount) || 35200,
+            total: 410476,
+            day: Number(item.day) || 7,
+            startMonth: item.startMonth == null ? june2026.startMonth : item.startMonth,
+            startYear: item.startYear || june2026.startYear,
+            endMonth: item.endMonth == null ? 11 : item.endMonth,
+            endYear: item.endYear || 2034
+          };
+        });
+        updateMatches(function (n) { return /emin\s*evim|eminevim/.test(n); }, { day: 28 });
 
-      useEffect(() => {
-        setSubs(storage.get('fp-subs') || DEFAULT_SUBS);
-        setDebts(storage.get('fp-debts') || []);
-        setReceivables(storage.get('fp-receivables') || []); // YENİ
-        setOneTime(storage.get('fp-onetime') || {});
-        setRecurring(storage.get('fp-recurring') || []);
-        setPaid(storage.get('fp-paid') || {});
-        if (!storage.get('fp-subs')) storage.set('fp-subs', DEFAULT_SUBS);
-        setLoading(false);
-      }, []);
+        upsert(function (n) { return /albarak/.test(n); }, {
+          name: "Albaraka Türk Kredi",
+          amount: 12500,
+          total: 50000,
+          day: 9,
+          startMonth: june2026.startMonth,
+          startYear: june2026.startYear,
+          endMonth: 8,
+          endYear: 2026
+        });
+        upsert(function (n) { return /enpara/.test(n) && /kart/.test(n); }, function (item) {
+          return {
+            name: "Enpara Kredi Kartı",
+            amount: 15000,
+            total: item.total == null ? null : Number(item.total) || null,
+            day: 10,
+            startMonth: item.startMonth == null ? june2026.startMonth : item.startMonth,
+            startYear: item.startYear || june2026.startYear,
+            endMonth: item.endMonth == null ? 11 : item.endMonth,
+            endYear: item.endYear || 2034
+          };
+        });
+        upsert(function (n) { return /ozum/.test(n) && /kart/.test(n); }, {
+          name: "Özüm Kredi Kartı",
+          amount: 7500,
+          total: null,
+          day: 5,
+          startMonth: june2026.startMonth,
+          startYear: june2026.startYear,
+          endMonth: 11,
+          endYear: 2034
+        });
+        upsert(function (n) { return /garanti/.test(n) && /troy/.test(n); }, {
+          name: "Garanti Bankası Kart Troy",
+          amount: 5000,
+          total: null,
+          day: 18,
+          startMonth: june2026.startMonth,
+          startYear: june2026.startYear,
+          endMonth: 11,
+          endYear: 2034
+        });
+        return next;
+      }
 
-      const save = (k, d, fn) => { fn(d); storage.set(k, d); };
+      function seedPersonalDebts() {
+        var seen = {};
+        var debts = [];
+        (state.recurring || []).forEach(function (item) {
+          if (!isPersonalDebtName(item.name)) return;
+          var key = normalizeText(item.name);
+          if (seen[key]) return;
+          seen[key] = true;
+          debts.push({
+            id: Date.now() + debts.length + 100,
+            name: item.name,
+            transactions: [
+              { id: Date.now() + debts.length + 200, type: "borrow", amount: Number(item.total || item.amount || 0), date: new Date().toISOString() }
+            ]
+          });
+        });
+        if (!seen.murat) {
+          debts.push({ id: Date.now() + 301, name: "Murat", transactions: [{ id: Date.now() + 302, type: "borrow", amount: 82500, date: new Date().toISOString() }] });
+        }
+        if (!seen.teyzem && !seen.teyze) {
+          debts.push({ id: Date.now() + 303, name: "Teyzem", transactions: [{ id: Date.now() + 304, type: "borrow", amount: 190900, date: new Date().toISOString() }] });
+        }
+        return debts;
+      }
 
-      // Calculations
-      const totalSubs = useMemo(() => subs.reduce((s, x) => s + x.amount, 0), [subs]);
-      
-      const debtStats = useMemo(() => {
-        let borrowed = 0, paidAmt = 0;
-        debts.forEach(d => d.transactions?.forEach(t => t.type === 'borrow' ? borrowed += t.amount : paidAmt += t.amount));
-        return { borrowed, paid: paidAmt, remaining: borrowed - paidAmt };
-      }, [debts]);
+      function fmt(value) {
+        return (Number(value) || 0).toLocaleString("tr-TR", {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        });
+      }
 
-      // YENİ: Alacak hesaplamaları
-      const receivableStats = useMemo(() => {
-        let lent = 0, collected = 0;
-        receivables.forEach(r => r.transactions?.forEach(t => t.type === 'lend' ? lent += t.amount : collected += t.amount));
-        return { lent, collected, remaining: lent - collected };
-      }, [receivables]);
+      function esc(value) {
+        return String(value == null ? "" : value).replace(/[&<>"']/g, function (ch) {
+          return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+          }[ch];
+        });
+      }
 
-      const getExpenses = useCallback(() => {
-        const ot = oneTime[monthKey] || [];
-        const mn = monthNum(year, month);
-        const rec = recurring.filter(e => mn >= monthNum(e.startYear, e.startMonth) && mn <= monthNum(e.endYear, e.endMonth));
-        return { oneTime: ot, recurring: rec };
-      }, [oneTime, recurring, monthKey, year, month]);
+      function vibrate(ms) {
+        if (navigator.vibrate) {
+          navigator.vibrate(ms || 9);
+        }
+      }
 
-      const { oneTime: otList, recurring: recList } = getExpenses();
-      const paidKeys = paid[monthKey] || [];
-      const isPaid = (id, isRec) => paidKeys.includes((isRec ? 'r-' : 'o-') + id);
+      function monthKey(year, month) {
+        return year + "-" + month;
+      }
 
-      const allExp = [...otList.map(e => ({...e, isRec: false})), ...recList.map(e => ({...e, isRec: true}))];
-      const totalExp = allExp.reduce((s, e) => s + e.amount, 0);
-      const paidExp = allExp.filter(e => isPaid(e.id, e.isRec)).reduce((s, e) => s + e.amount, 0);
-      const unpaidExp = totalExp - paidExp;
+      function activeMonthKey() {
+        return monthKey(state.year, state.month);
+      }
 
-      const chartData = useMemo(() => {
-        const data = [];
-        for (let i = 5; i >= 0; i--) {
-          let m = now.getMonth() - i, y = now.getFullYear();
-          if (m < 0) { m += 12; y--; }
-          const key = `${y}-${m}`;
-          const ot = oneTime[key] || [];
-          const mn = monthNum(y, m);
-          const rec = recurring.filter(e => mn >= monthNum(e.startYear, e.startMonth) && mn <= monthNum(e.endYear, e.endMonth));
-          data.push({ month: MONTHS[m].slice(0,3), value: ot.reduce((s,e) => s+e.amount, 0) + rec.reduce((s,e) => s+e.amount, 0) });
+      function monthNum(year, month) {
+        return year * 12 + month;
+      }
+
+      function normalizeText(value) {
+        var text = String(value || "");
+        if (text.normalize) {
+          text = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
+        return text
+          .toLowerCase()
+          .replace(/ı/g, "i")
+          .replace(/ğ/g, "g")
+          .replace(/ü/g, "u")
+          .replace(/ş/g, "s")
+          .replace(/ö/g, "o")
+          .replace(/ç/g, "c")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      function isPersonalDebtName(name) {
+        var n = normalizeText(name);
+        if (/^(murat|teyze|teyzem)$/.test(n) || /teyze/.test(n)) return true;
+        return (state.personalDebts || []).some(function (debt) {
+          return normalizeText(debt.name) === n;
+        });
+      }
+
+      function brandOf(name) {
+        var raw = String(name || "");
+        var n = normalizeText(raw);
+        var first = raw.trim().charAt(0).toUpperCase() || "₺";
+
+        if (/akbank/.test(n)) return { id: "akbank", cls: "brand-akbank", mark: "Akbank", sub: "", label: "Akbank", color: "#e30613", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Akbank_logo.svg/250px-Akbank_logo.svg.png" };
+        if (/garanti|bbva|ozum|troy/.test(n)) return { id: "garanti", cls: "brand-garanti", mark: "Garanti", sub: "", label: "Garanti Bankası", color: "#008b5f", logo: "https://upload.wikimedia.org/wikipedia/en/thumb/4/4d/Garanti_BBVA_Logo.svg/250px-Garanti_BBVA_Logo.svg.png" };
+        if (/emin\s*evim|eminevim/.test(n)) return { id: "eminevim", cls: "brand-eminevim", mark: "Eminevim", sub: "", label: "Eminevim", color: "#008457" };
+        if (/albarak/.test(n)) return { id: "albaraka", cls: "brand-albaraka", mark: "Albaraka", sub: "Türk", label: "Albaraka Türk", color: "#00a19a", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Al_Baraka_Banking_Group_Logo.svg/250px-Al_Baraka_Banking_Group_Logo.svg.png" };
+        if (/isbank|is\s*bank|is\s*b?n?ankasi|turkiye\s*is/.test(n)) return { id: "isbank", cls: "brand-isbank", mark: "İşbank", sub: "", label: "Türkiye İş Bankası", color: "#0b3a82", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/T%C3%BCrkiye_%C4%B0%C5%9F_Bankas%C4%B1_logo.svg/250px-T%C3%BCrkiye_%C4%B0%C5%9F_Bankas%C4%B1_logo.svg.png" };
+        if (/ssk|sgk|sosyal guvenlik|bagkur|bag-kur/.test(n)) return { id: "sgk", cls: "brand-sgk", mark: "SGK", sub: "prim", label: "SGK / SSK", color: "#2451a3", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/T.C._Sosyal_G%C3%BCvenlik_Kurumu_logo.svg/250px-T.C._Sosyal_G%C3%BCvenlik_Kurumu_logo.svg.png" };
+        if (/saglik|saglik sigortasi|tamamlayici|ozel saglik|sigorta/.test(n)) return { id: "health", cls: "brand-health", mark: "Sağlık", sub: "", label: "Sağlık", color: "#13a37f" };
+        if (/enpara/.test(n)) return { id: "enpara", cls: "brand-enpara", mark: "Enpara", sub: "", label: "Enpara", color: "#7623bf", logo: "https://www.enpara.com/Frontend/dist/images/enpara.svg" };
+        if (/ziraat/.test(n)) return { id: "ziraat", cls: "brand-ziraat", mark: "Z", sub: "bank", label: "Ziraat", color: "#d71920" };
+        if (/yapi kredi|yapikredi/.test(n)) return { id: "yapikredi", cls: "brand-yapikredi", mark: "YK", sub: "bank", label: "Yapı Kredi", color: "#004990" };
+        if (/halkbank|halk bank/.test(n)) return { id: "halkbank", cls: "brand-halkbank", mark: "H", sub: "bank", label: "Halkbank", color: "#006bb6" };
+        if (/vakif/.test(n)) return { id: "vakif", cls: "brand-vakif", mark: "V", sub: "bank", label: "VakıfBank", color: "#e0a313" };
+        if (/qnb|finansbank/.test(n)) return { id: "qnb", cls: "brand-qnb", mark: "Q", sub: "qnb", label: "QNB", color: "#5e2a84" };
+        if (/teb/.test(n)) return { id: "teb", cls: "brand-teb", mark: "TEB", sub: "", label: "TEB", color: "#00a650" };
+        if (/denizbank|deniz bank/.test(n)) return { id: "deniz", cls: "brand-deniz", mark: "D", sub: "bank", label: "DenizBank", color: "#d71920" };
+        if (/ing/.test(n)) return { id: "ing", cls: "brand-ing", mark: "ING", sub: "", label: "ING", color: "#ff6200" };
+        if (/altin|gram|ceyrek|yarim/.test(n)) return { id: "gold", cls: "brand-gold", mark: "AU", sub: "altın", label: "Altın", color: "#b88a2a" };
+        if (/aidat|site|apartman|rezidans|residence|kira|konut|ev/.test(n)) return { id: "home", cls: "brand-home", mark: "Ev", sub: "", label: "Ev", color: "#334155" };
+        if (/elektrik|su|dogalgaz|fatura|internet|telefon/.test(n)) return { id: "utility", cls: "brand-utility", mark: "F", sub: "fatura", label: "Fatura", color: "#0786a0" };
+        return { id: "generic", cls: "brand-generic", mark: first, sub: "", label: "Özel", color: "#303741" };
+      }
+
+      function brandMark(name, size) {
+        var b = brandOf(name);
+        var logoClass = b.logo ? " has-logo" : "";
+        var logo = b.logo ? '<img class="brand-logo" src="' + esc(b.logo) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove();this.parentNode.classList.remove(\'has-logo\');">' : "";
+        return '<span class="brand-mark ' + (size || "md") + " " + b.cls + logoClass + '" aria-hidden="true">' + logo + '<span class="brand-main">' + esc(b.mark) + '</span><span class="brand-sub">' + esc(b.sub) + "</span></span>";
+      }
+
+      function classify(name) {
+        var n = normalizeText(name);
+        if (/kart/.test(n)) return "card";
+        if (/nakit avans|avans|nakit hesap/.test(n)) return "cash";
+        if (/(kredi|albarak|emin\s*evim|eminevim|taksit)/.test(n) && !/kart/.test(n)) return "loan";
+        if (/(kira|aidat|elektrik|su|dogalgaz|fatura|internet|telefon|market|sigorta|saglik|ssk|sgk|bagkur|sosyal guvenlik|benzin|yakit)/.test(n)) return "fixed";
+        return "person";
+      }
+
+      function groupOf(name) {
+        var type = classify(name);
+        if (type === "loan" || type === "cash") return "loan";
+        if (type === "card") return "card";
+        if (type === "fixed") return "fixed";
+        return "person";
+      }
+
+      function groupLabel(group, item) {
+        if (group === "loan") return classify(item.name) === "cash" ? "Nakit avans" : "Kredi / taksit";
+        if (group === "card") return "Kredi kartı";
+        if (group === "fixed") return "Sabit ödeme";
+        return "Diğer aylık ödeme";
+      }
+
+      function paymentKey(item) {
+        return (item.isRec ? "r-" : "o-") + item.id;
+      }
+
+      function isPaid(id, isRec) {
+        return (state.paid[activeMonthKey()] || []).indexOf((isRec ? "r-" : "o-") + id) > -1;
+      }
+
+      function paidMonthsCount(recId) {
+        var count = 0;
+        Object.keys(state.paid).forEach(function (key) {
+          if ((state.paid[key] || []).indexOf("r-" + recId) > -1) count += 1;
+        });
+        return count;
+      }
+
+      function currentRemaining(item) {
+        if (item.total == null || item.total === "") return null;
+        var total = Number(item.total) || 0;
+        if (!item.isRec) {
+          return Math.max(0, total - (isPaid(item.id, false) ? Number(item.amount) || 0 : 0));
+        }
+        return Math.max(0, total - paidMonthsCount(item.id) * (Number(item.amount) || 0));
+      }
+
+      function getMonthExp(year, month) {
+        var key = monthKey(year, month);
+        var oneTime = (state.oneTime[key] || []).filter(function (item) {
+          return !isPersonalDebtName(item.name);
+        }).map(function (item) {
+          return Object.assign({}, item, { isRec: false });
+        });
+        var mn = monthNum(year, month);
+        var recurring = state.recurring
+          .filter(function (item) {
+            return !isPersonalDebtName(item.name) && mn >= monthNum(item.startYear, item.startMonth) && mn <= monthNum(item.endYear, item.endMonth);
+          })
+          .map(function (item) {
+            return Object.assign({}, item, { isRec: true });
+          });
+        return oneTime.concat(recurring);
+      }
+
+      function getStats() {
+        var all = getMonthExp(state.year, state.month);
+        var groups = {
+          loan: all.filter(function (item) { return groupOf(item.name) === "loan"; }),
+          card: all.filter(function (item) { return groupOf(item.name) === "card"; }),
+          fixed: all.filter(function (item) { return groupOf(item.name) === "fixed"; }),
+          person: all.filter(function (item) { return groupOf(item.name) === "person"; })
+        };
+        var total = all.reduce(function (sum, item) { return sum + (Number(item.amount) || 0); }, 0);
+        var paidTotal = all
+          .filter(function (item) { return isPaid(item.id, item.isRec); })
+          .reduce(function (sum, item) { return sum + (Number(item.amount) || 0); }, 0);
+        var unpaid = Math.max(0, total - paidTotal);
+        function openDebtValue(item) {
+          var remaining = currentRemaining(item);
+          if (remaining != null) return remaining;
+          return isPaid(item.id, item.isRec) ? 0 : (Number(item.amount) || 0);
+        }
+        function remainingTotal(items) {
+          return items.reduce(function (sum, item) {
+            return sum + openDebtValue(item);
+          }, 0);
+        }
+        var loanDebt = remainingTotal(groups.loan);
+        var cardDebt = remainingTotal(groups.card);
+        var debt = loanDebt + cardDebt;
+        var grandOpen = loanDebt + cardDebt + unpaid;
+        var monthlyLoan = groups.loan.reduce(function (sum, item) { return sum + (Number(item.amount) || 0); }, 0);
+        var monthlyCard = groups.card.reduce(function (sum, item) { return sum + (Number(item.amount) || 0); }, 0);
+        var monthlyFixed = groups.fixed.concat(groups.person).reduce(function (sum, item) { return sum + (Number(item.amount) || 0); }, 0);
+        var monthlyOther = groups.person.reduce(function (sum, item) { return sum + (Number(item.amount) || 0); }, 0);
+        return {
+          all: all,
+          groups: groups,
+          total: total,
+          paid: paidTotal,
+          unpaid: unpaid,
+          debt: debt,
+          loanDebt: loanDebt,
+          cardDebt: cardDebt,
+          grandOpen: grandOpen,
+          monthlyLoan: monthlyLoan,
+          monthlyCard: monthlyCard,
+          monthlyFixed: monthlyFixed,
+          monthlyOther: monthlyOther
+        };
+      }
+
+      function groupUnpaid(items) {
+        return items
+          .filter(function (item) { return !isPaid(item.id, item.isRec); })
+          .reduce(function (sum, item) { return sum + (Number(item.amount) || 0); }, 0);
+      }
+
+      function debtTotals(debt) {
+        var borrowed = 0;
+        var paid = 0;
+        (debt.transactions || []).forEach(function (tx) {
+          if (tx.type === "pay") paid += Number(tx.amount) || 0;
+          else borrowed += Number(tx.amount) || 0;
+        });
+        return { borrowed: borrowed, paid: paid, remaining: Math.max(0, borrowed - paid) };
+      }
+
+      function personalDebtStats() {
+        return (state.personalDebts || []).reduce(function (acc, debt) {
+          var t = debtTotals(debt);
+          acc.borrowed += t.borrowed;
+          acc.paid += t.paid;
+          acc.remaining += t.remaining;
+          return acc;
+        }, { borrowed: 0, paid: 0, remaining: 0 });
+      }
+
+      function sortPayments(items) {
+        return items.slice().sort(function (a, b) {
+          return ((Number(a.day) || 31) - (Number(b.day) || 31)) ||
+            String(a.name || "").localeCompare(String(b.name || ""), "tr");
+        });
+      }
+
+      function advisor(stats) {
+        var pct = stats.total > 0 ? Math.round((stats.paid / stats.total) * 100) : 0;
+        var unpaid = stats.groups.loan.concat(stats.groups.card, stats.groups.fixed, stats.groups.person)
+          .filter(function (item) { return !isPaid(item.id, item.isRec); })
+          .slice()
+          .sort(function (a, b) { return (Number(a.day) || 31) - (Number(b.day) || 31); });
+        var urgentLoanCard = stats.groups.loan.concat(stats.groups.card)
+          .filter(function (item) { return !isPaid(item.id, item.isRec); })
+          .slice()
+          .sort(function (a, b) { return (Number(a.day) || 31) - (Number(b.day) || 31); })[0];
+        var urgent = urgentLoanCard || unpaid[0];
+        var loanLeft = groupUnpaid(stats.groups.loan);
+        var surplus = ADV.avgIncome - stats.total;
+        var cost = Math.round(ADV.cashAdvance * ADV.cashAdvanceRate);
+        var title = "Ay kontrol altında";
+        var body = "Bu ay için ödeme panon hazır.";
+        if (stats.total === 0) {
+          title = "Bu ay sakin";
+          body = "Seçili ayda kayıtlı ödeme görünmüyor.";
+        } else if (pct === 100) {
+          title = "Ay tamamen kapandı";
+          body = "Ödemelerin tamamlandı. Fazla nakdi yüksek faizli kart ve avanslara yönlendirmek iyi görünür.";
+        } else if (loanLeft > 0) {
+          title = "Öncelik kredi ödemeleri";
+          body = "Bu ay kredi ve taksit tarafında " + fmt(loanLeft) + "₺ açık var. İlk sırada " + (urgent ? urgent.name + " var." : "en erken günlü ödeme var.");
+        } else {
+          title = "Kredi tarafı temiz";
+          body = "Şimdi kart, avans ve sabit ödemeleri kapatmaya odaklanabilirsin. Kalan tutar " + fmt(stats.unpaid) + "₺.";
+        }
+        if (surplus < 0 && stats.total > 0) {
+          body += " Aylık yük ortalama gelirden yaklaşık " + fmt(Math.abs(surplus)) + "₺ fazla.";
+        } else if (stats.unpaid > 0 && cost > 0) {
+          body += " Avans maliyeti aylık yaklaşık " + fmt(cost) + "₺ seviyesinde.";
+        }
+        return { pct: pct, title: title, body: body, urgent: urgent, upcoming: unpaid.slice(0, 3) };
+      }
+
+      function chartData() {
+        var data = [];
+        for (var i = 5; i >= 0; i -= 1) {
+          var m = now.getMonth() - i;
+          var y = now.getFullYear();
+          while (m < 0) {
+            m += 12;
+            y -= 1;
+          }
+          data.push({
+            label: M3[m],
+            value: getMonthExp(y, m).reduce(function (sum, item) { return sum + (Number(item.amount) || 0); }, 0)
+          });
         }
         return data;
-      }, [oneTime, recurring, now]);
+      }
 
-      // Subscription Actions
-      const addSub = () => {
-        if (!newSub.name || !newSub.amount) return;
-        vibrate();
-        save('fp-subs', [...subs, {id: Date.now(), name: newSub.name, amount: parseFloat(newSub.amount)}], setSubs);
-        setNewSub({name:'',amount:''});
-      };
-      const updateSub = (id, amt) => {
-        vibrate();
-        save('fp-subs', subs.map(s => s.id === id ? {...s, amount: parseFloat(amt) || 0} : s), setSubs);
-        setEditSub(null);
-      };
-      const delSub = id => { vibrate(20); save('fp-subs', subs.filter(s => s.id !== id), setSubs); };
+      function renderBrandRail() {
+        return '<div class="brand-rail">' + KNOWN_BRANDS.map(function (name) {
+          var label = brandOf(name).label;
+          return '<div class="brand-chip">' + brandMark(name, "sm") + "<span>" + esc(label) + "</span></div>";
+        }).join("") + "</div>";
+      }
 
-      // Debt Actions
-      const addDebt = () => {
-        if (!newDebt.name || !newDebt.total) return;
-        vibrate();
-        save('fp-debts', [...debts, {id: Date.now(), name: newDebt.name, transactions: [{id: Date.now(), type:'borrow', amount: parseFloat(newDebt.total), date: new Date().toISOString()}]}], setDebts);
-        setNewDebt({name:'',total:''});
-      };
-      const debtTx = (id, type) => {
-        const a = debtAction[id];
-        if (!a?.amount || parseFloat(a.amount) <= 0) return;
-        vibrate();
-        save('fp-debts', debts.map(d => d.id === id ? {...d, transactions: [...d.transactions, {id: Date.now(), type, amount: parseFloat(a.amount), date: new Date().toISOString()}]} : d), setDebts);
-        setDebtAction({...debtAction, [id]: {type: null, amount: ''}});
-      };
-      const delDebt = id => { if (confirm('Bu borcu sil?')) { vibrate(20); save('fp-debts', debts.filter(d => d.id !== id), setDebts); } };
-      const getDebtRemaining = d => d.transactions?.reduce((s, t) => t.type === 'borrow' ? s + t.amount : s - t.amount, 0) || 0;
+      function renderHome(stats) {
+        var adv = advisor(stats);
+        var progress = Math.min(100, Math.max(0, adv.pct));
+        var priority = adv.upcoming.length
+          ? adv.upcoming.map(function (item) {
+              return '<div class="priority-item">' +
+                brandMark(item.name, "xs") +
+                '<div style="min-width:0;flex:1"><h4>' + esc(item.name) + '</h4><p>' + (item.day ? item.day + ". gün" : "Gün yok") + " · " + groupLabel(groupOf(item.name), item) + "</p></div>" +
+                "<strong>₺" + fmt(item.amount) + "</strong>" +
+              "</div>";
+            }).join("")
+          : '<div class="empty" style="padding:22px 10px">Bu ay bekleyen ödeme yok.</div>';
 
-      // YENİ: Alacak Actions
-      const addReceivable = () => {
-        if (!newReceivable.name || !newReceivable.total) return;
-        vibrate();
-        save('fp-receivables', [...receivables, {id: Date.now(), name: newReceivable.name, transactions: [{id: Date.now(), type:'lend', amount: parseFloat(newReceivable.total), date: new Date().toISOString()}]}], setReceivables);
-        setNewReceivable({name:'',total:''});
-      };
-      const recTx = (id, type) => {
-        const a = recAction[id];
-        if (!a?.amount || parseFloat(a.amount) <= 0) return;
-        vibrate();
-        save('fp-receivables', receivables.map(r => r.id === id ? {...r, transactions: [...r.transactions, {id: Date.now(), type, amount: parseFloat(a.amount), date: new Date().toISOString()}]} : r), setReceivables);
-        setRecAction({...recAction, [id]: {type: null, amount: ''}});
-      };
-      const delReceivable = id => { if (confirm('Bu alacağı sil?')) { vibrate(20); save('fp-receivables', receivables.filter(r => r.id !== id), setReceivables); } };
-      const getRecRemaining = r => r.transactions?.reduce((s, t) => t.type === 'lend' ? s + t.amount : s - t.amount, 0) || 0;
+        return '' +
+          '<section class="hero">' +
+            '<div class="hero-content">' +
+              '<div>' +
+                '<span class="eyebrow">Kişisel Finans Panosu</span>' +
+                '<h2>' + esc(adv.title) + '</h2>' +
+                '<p>' + esc(adv.body) + '</p>' +
+              '</div>' +
+              '<div class="dial" style="--p:' + progress + '"><div class="dial-inner">' + progress + '%</div></div>' +
+            '</div>' +
+            '<div class="hero-metrics">' +
+              '<div class="hero-metric"><span>Toplam</span><strong>₺' + fmt(stats.total) + '</strong></div>' +
+              '<div class="hero-metric"><span>Ödenen</span><strong>₺' + fmt(stats.paid) + '</strong></div>' +
+              '<div class="hero-metric"><span>Kalan</span><strong>₺' + fmt(stats.unpaid) + '</strong></div>' +
+            '</div>' +
+          '</section>' +
+          '<div class="metric-grid">' +
+            '<button class="metric-card" data-action="tab" data-tab="expenses"><span>Aylık Toplam</span><strong>₺' + fmt(stats.total) + '</strong><small>' + MONTHS[state.month] + ' ödemeleri</small></button>' +
+            '<button class="metric-card" data-action="tab" data-tab="cards"><span>Kredi Toplamı</span><strong class="color-red">₺' + fmt(stats.loanDebt) + '</strong><small>Aylık ₺' + fmt(stats.monthlyLoan) + '</small></button>' +
+            '<button class="metric-card" data-action="tab" data-tab="cards"><span>Kart Toplamı</span><strong class="color-gold">₺' + fmt(stats.cardDebt) + '</strong><small>Aylık ₺' + fmt(stats.monthlyCard) + '</small></button>' +
+            '<button class="metric-card" data-action="tab" data-tab="expenses"><span>Kalan Ödeme</span><strong class="' + (stats.unpaid ? "color-red" : "color-green") + '">₺' + fmt(stats.unpaid) + '</strong><small>' + (stats.unpaid ? "Bekliyor" : "Kapandı") + '</small></button>' +
+          '</div>' +
+          renderBrandRail() +
+          '<section class="priority-card">' +
+            '<div class="section-title"><span>Öncelik Sırası</span><strong>₺' + fmt(stats.unpaid) + '</strong></div>' +
+            '<div class="priority-list">' + priority + '</div>' +
+          '</section>' +
+          renderChart();
+      }
 
-      // Expense Actions
-      const addExp = () => {
-        if (!newExp.name || !newExp.amount) return;
-        vibrate();
-        if (newExp.recurring) {
-          save('fp-recurring', [...recurring, {id: Date.now(), name: newExp.name, amount: parseFloat(newExp.amount), startMonth: month, startYear: year, endMonth: parseInt(newExp.endMonth), endYear: parseInt(newExp.endYear)}], setRecurring);
-        } else {
-          const curr = oneTime[monthKey] || [];
-          save('fp-onetime', {...oneTime, [monthKey]: [...curr, {id: Date.now(), name: newExp.name, amount: parseFloat(newExp.amount)}]}, setOneTime);
+      function renderChart() {
+        var data = chartData();
+        var max = data.reduce(function (m, item) { return Math.max(m, item.value); }, 1);
+        return '<section class="chart-card">' +
+          '<div class="section-title"><span>Son 6 Ay</span><strong>Aylık gider</strong></div>' +
+          '<div class="bars">' + data.map(function (item, index) {
+            var height = Math.max(6, Math.round((item.value / max) * 74));
+            var active = index === data.length - 1 ? " active" : "";
+            return '<div class="bar-wrap"><div class="bar' + active + '" style="height:' + height + 'px"></div><span class="bar-label">' + esc(item.label) + '</span></div>';
+          }).join("") + '</div>' +
+        '</section>';
+      }
+
+      function renderExpenses(stats) {
+        var html = '' +
+          '<section class="toolbar-card">' +
+            '<button class="nav-btn" data-action="prev-month" aria-label="Önceki ay">‹</button>' +
+            '<div class="month-center"><strong>' + MONTHS[state.month] + '</strong><span>' + state.year + '</span></div>' +
+            '<button class="nav-btn" data-action="next-month" aria-label="Sonraki ay">›</button>' +
+          '</section>' +
+          '<div class="month-strip">' + MONTHS.map(function (_, i) {
+            var has = getMonthExp(state.year, i).length > 0;
+            var cls = "month-chip" + (has ? " has-data" : "") + (i === state.month ? " active" : "");
+            return '<button class="' + cls + '" data-action="select-month" data-month="' + i + '">' + M3[i] + '</button>';
+          }).join("") + '</div>' +
+          '<section class="summary-strip summary-single">' +
+            '<div class="summary-cell"><span>Aylık Ödeme Toplamı</span><strong class="' + (stats.unpaid ? "color-red" : "color-green") + '">₺' + fmt(stats.unpaid) + '</strong><small>Bu ay toplam ₺' + fmt(stats.total) + ' · Ödenen ₺' + fmt(stats.paid) + '</small></div>' +
+          '</section>';
+
+        html += renderPaymentSection("Ay Sırası", stats.all, "1. günden son güne · Kalan ₺" + fmt(stats.unpaid));
+
+        if (!stats.all.length) {
+          html += '<div class="empty">' + MONTHS[state.month] + ' için ödeme yok.</div>';
         }
-        setNewExp({name:'',amount:'',recurring:false,endMonth:now.getMonth(),endYear:now.getFullYear()+1});
-        setShowRecForm(false);
-      };
-      const togglePaid = (id, isRec) => {
-        vibrate();
-        const key = (isRec ? 'r-' : 'o-') + id;
-        const curr = paid[monthKey] || [];
-        save('fp-paid', {...paid, [monthKey]: curr.includes(key) ? curr.filter(k => k !== key) : [...curr, key]}, setPaid);
-      };
-      const delExp = (id, isRec) => {
-        vibrate(20);
-        if (isRec) {
-          if (confirm('Bu tekrarlayan gideri sil?')) save('fp-recurring', recurring.filter(e => e.id !== id), setRecurring);
+
+        if (state.addOpen) {
+          html += renderAddPayment();
         } else {
-          const curr = oneTime[monthKey] || [];
-          save('fp-onetime', {...oneTime, [monthKey]: curr.filter(e => e.id !== id)}, setOneTime);
+          html += '<button class="add-btn" data-action="show-add">+ Ödeme Ekle</button>';
         }
-      };
+        return html;
+      }
 
-      const prevMonth = () => { vibrate(5); if (month === 0) { setMonth(11); setYear(year-1); } else setMonth(month-1); };
-      const nextMonth = () => { vibrate(5); if (month === 11) { setMonth(0); setYear(year+1); } else setMonth(month+1); };
+      function renderPaymentSection(title, items, meta) {
+        return '<section class="payment-section">' +
+          '<div class="section-title"><span>' + esc(title) + '</span><strong>' + esc(meta || ("₺" + fmt(groupUnpaid(items)))) + '</strong></div>' +
+          '<div class="payment-grid">' + (items.length ? sortPayments(items).map(renderPaymentCard).join("") : '<div class="empty" style="padding:16px 10px;font-size:11px">Kayıt yok.</div>') + '</div>' +
+        '</section>';
+      }
 
-      if (loading) return <div style={S.loading}><div style={S.spinner}/></div>;
+      function renderPaymentCard(item) {
+        var key = paymentKey(item);
+        if (state.editKey === key) return renderEditPayment(item);
+        var paid = isPaid(item.id, item.isRec);
+        var brand = brandOf(item.name);
+        var group = groupOf(item.name);
+        var remaining = currentRemaining(item);
+        var done = remaining != null && remaining <= 0;
+        var debtLabel = group === "card" ? "Kart borcu" : (group === "loan" ? "Toplam borç" : "Durum");
+        var debtText = paid ? "Ödendi" : "Bekliyor";
+        var debtGood = paid;
+        var statusText = paid ? "Kapandı" : "Bekliyor";
+        if (remaining != null) {
+          debtText = done ? "Kapandı" : "₺" + fmt(remaining);
+          debtGood = done;
+          statusText = done ? "Kapandı" : (paid ? "Bu ay ödendi" : "Açık");
+        } else if (group === "card" || group === "loan") {
+          debtText = paid ? "Kapandı" : "₺" + fmt(item.amount);
+          debtGood = paid;
+          statusText = paid ? "Kapandı" : "Aylık açık";
+        }
+        var middle = '<div class="payment-stat"><span class="micro-label">' + debtLabel + '</span><strong class="debt-value ' + (debtGood ? "good" : "") + '">' + debtText + '</strong></div>' +
+          '<div class="payment-stat"><span class="micro-label">Bu ay</span><strong class="debt-value">₺' + fmt(item.amount) + '</strong></div>';
+        return '<article class="payment-card' + (paid ? " is-paid" : "") + '" style="--brand:' + brand.color + '">' +
+          '<div class="payment-top">' +
+            brandMark(item.name, "md") +
+            '<div class="payment-title"><h3>' + esc(item.name) + '</h3><p>' + groupLabel(group, item) + ' · ' + (item.isRec ? "Her ay" : "Tek sefer") + '</p></div>' +
+            '<span class="due-pill">' + (item.day ? item.day + ". gün" : "Gün yok") + '</span>' +
+          '</div>' +
+          '<div class="payment-middle">' + middle + '</div>' +
+          '<div class="payment-bottom">' +
+            '<div class="amount-block"><span class="payment-label">Durum</span><strong class="amount">' + statusText + '</strong></div>' +
+            '<button class="pay-btn' + (paid ? " paid" : "") + '" data-action="toggle-paid" data-key="' + key + '">' + (paid ? "Ödendi" : "Öde") + '</button>' +
+            '<button class="icon-btn" data-action="edit-payment" data-key="' + key + '" aria-label="Düzenle">✎</button>' +
+            '<button class="icon-btn delete" data-action="delete-payment" data-key="' + key + '" aria-label="Sil">×</button>' +
+          '</div>' +
+        '</article>';
+      }
 
-      return (
-        <div style={S.app}>
-          {/* Header */}
-          <header style={S.header}>
-            <div>
-              <h1 style={S.logo}>Finans<span style={{color:'var(--accent)'}}>Pro</span></h1>
-              <p style={S.date}>{MONTHS[now.getMonth()]} {now.getFullYear()}</p>
-            </div>
-            <button onClick={() => setDark(!dark)} style={S.themeBtn}>{dark ? '☀️' : '🌙'}</button>
-          </header>
+      function renderEditPayment(item) {
+        var key = paymentKey(item);
+        return '<article class="payment-card edit-card" style="--brand:' + brandOf(item.name).color + '">' +
+          '<form class="form-grid" data-edit-form data-key="' + key + '">' +
+            '<div class="field"><label>Ad</label><input class="input" name="name" value="' + esc(item.name) + '" autocomplete="off"></div>' +
+            '<div class="form-row">' +
+              '<div class="field"><label>Bu ay ₺</label><input class="input" name="amount" type="number" inputmode="decimal" value="' + esc(item.amount) + '"></div>' +
+              '<div class="field"><label>Gün</label><input class="input" name="day" type="number" inputmode="numeric" value="' + esc(item.day || "") + '"></div>' +
+            '</div>' +
+            '<div class="field"><label>Toplam tutar / kalan borç ₺</label><input class="input" name="total" type="number" inputmode="decimal" value="' + esc(item.total == null ? "" : item.total) + '"></div>' +
+            '<div class="form-actions"><button type="button" class="primary-btn" data-action="save-edit">Kaydet</button><button type="button" class="ghost-btn" data-action="cancel-edit">İptal</button></div>' +
+          '</form>' +
+        '</article>';
+      }
 
-          {/* Content */}
-          <main style={S.main}>
-            {/* Dashboard */}
-            {tab === 'dashboard' && (
-              <div className="fade-up">
-                <div style={S.statsGrid}>
-                  <div style={{...S.statCard, borderLeft: '3px solid var(--accent)'}} onClick={() => setTab('subs')}>
-                    <span style={S.statIcon}>📱</span>
-                    <div>
-                      <p style={S.statLabel}>Abonelik</p>
-                      <p style={S.statValue}>₺{fmt(totalSubs)}</p>
-                    </div>
-                  </div>
-                  <div style={{...S.statCard, borderLeft: '3px solid var(--warning)'}} onClick={() => setTab('debts')}>
-                    <span style={S.statIcon}>📉</span>
-                    <div>
-                      <p style={S.statLabel}>Borç</p>
-                      <p style={S.statValue}>₺{fmt(Math.max(0, debtStats.remaining))}</p>
-                    </div>
-                  </div>
-                  <div style={{...S.statCard, borderLeft: '3px solid var(--receivable)'}} onClick={() => setTab('receivables')}>
-                    <span style={S.statIcon}>📈</span>
-                    <div>
-                      <p style={S.statLabel}>Alacak</p>
-                      <p style={S.statValue}>₺{fmt(Math.max(0, receivableStats.remaining))}</p>
-                    </div>
-                  </div>
-                  <div style={{...S.statCard, borderLeft: `3px solid ${unpaidExp > 0 ? 'var(--danger)' : 'var(--success)'}`}} onClick={() => setTab('expenses')}>
-                    <span style={S.statIcon}>{unpaidExp > 0 ? '⏳' : '✓'}</span>
-                    <div>
-                      <p style={S.statLabel}>Kalan</p>
-                      <p style={S.statValue}>₺{fmt(unpaidExp)}</p>
-                    </div>
-                  </div>
-                </div>
+      function renderAddPayment() {
+        return '<section class="add-panel">' +
+          '<div class="brand-preview" data-brand-preview>' +
+            brandMark("Yeni ödeme", "xl") +
+            '<div><strong>Yeni ödeme</strong><span class="preview-sub">Logo adı takip eder</span></div>' +
+          '</div>' +
+          '<form class="form-grid" id="add-payment-form">' +
+            '<div class="field"><label>Ödeme adı</label><input class="input" name="name" data-live-brand autocomplete="off" placeholder="Akbank kredi, Aidat, SGK, sağlık sigortası"></div>' +
+            '<div class="form-row">' +
+              '<div class="field"><label>Bu ay ₺</label><input class="input" name="amount" type="number" inputmode="decimal" placeholder="0"></div>' +
+              '<div class="field"><label>Gün</label><input class="input" name="day" type="number" inputmode="numeric" placeholder="1"></div>' +
+            '</div>' +
+            '<div class="field"><label>Toplam tutar / kalan borç ₺</label><input class="input" name="total" type="number" inputmode="decimal" placeholder="Opsiyonel"></div>' +
+            '<label class="toggle-row"><input type="checkbox" name="recurring" checked><span>Her ay tekrarlasın</span></label>' +
+            '<div class="form-actions"><button type="button" class="primary-btn" data-action="add-payment">Ekle</button><button type="button" class="ghost-btn" data-action="hide-add">Vazgeç</button></div>' +
+          '</form>' +
+        '</section>';
+      }
 
-                <div style={S.card}>
-                  <h3 style={S.cardTitle}>Aylık Gider Trendi</h3>
-                  <div style={{height: 80, marginTop: 12}}>
-                    <MiniChart data={chartData.map(d => d.value)} color="var(--accent)" height={80}/>
-                  </div>
-                  <div style={S.chartLabels}>
-                    {chartData.map((d, i) => <span key={i} style={S.chartLabel}>{d.month}</span>)}
-                  </div>
-                </div>
+      function renderCards(stats) {
+        var loanAndCard = stats.groups.loan.concat(stats.groups.card);
+        var html = '' +
+          '<section class="summary-strip">' +
+            '<div class="summary-cell"><span>Kredi</span><strong class="color-red">₺' + fmt(stats.loanDebt) + '</strong></div>' +
+            '<div class="summary-cell"><span>Kart</span><strong class="color-gold">₺' + fmt(stats.cardDebt) + '</strong></div>' +
+            '<div class="summary-cell"><span>Aylık</span><strong>₺' + fmt(stats.monthlyLoan + stats.monthlyCard) + '</strong></div>' +
+          '</section>' +
+          '<div class="metric-grid">' +
+            '<div class="metric-card"><span>Kredi Taksitleri</span><strong>₺' + fmt(stats.monthlyLoan) + '</strong><small>Bu ayki ödeme</small></div>' +
+            '<div class="metric-card"><span>Kart Ödemeleri</span><strong>₺' + fmt(stats.monthlyCard) + '</strong><small>Bu ayki ödeme</small></div>' +
+          '</div>';
 
-                <div style={S.card}>
-                  <h3 style={S.cardTitle}>Genel Bakış</h3>
-                  <div style={S.donutContainer}>
-                    <DonutChart segments={[
-                      {value: totalSubs, color: 'var(--accent)'},
-                      {value: Math.max(0, debtStats.remaining), color: 'var(--warning)'},
-                      {value: Math.max(0, receivableStats.remaining), color: 'var(--receivable)'},
-                      {value: unpaidExp, color: 'var(--danger)'}
-                    ]} size={130}/>
-                    <div style={S.donutLegend}>
-                      <div style={S.legendItem}><span style={{...S.legendDot, background:'var(--accent)'}}/>Abonelik</div>
-                      <div style={S.legendItem}><span style={{...S.legendDot, background:'var(--warning)'}}/>Borç</div>
-                      <div style={S.legendItem}><span style={{...S.legendDot, background:'var(--receivable)'}}/>Alacak</div>
-                      <div style={S.legendItem}><span style={{...S.legendDot, background:'var(--danger)'}}/>Gider</div>
-                    </div>
-                  </div>
-                </div>
+        html += renderPaymentSection("Krediler & Nakit Avans", stats.groups.loan, "loan");
+        html += renderPaymentSection("Kredi Kartları", stats.groups.card, "card");
 
-                {/* Net Durum */}
-                <div style={{...S.card, background: receivableStats.remaining > debtStats.remaining ? 'linear-gradient(135deg, var(--success), #3d8b6a)' : 'linear-gradient(135deg, var(--warning), #c49543)', color: '#fff'}}>
-                  <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                    <div>
-                      <p style={{fontSize:12, opacity:0.9}}>Net Durum</p>
-                      <p style={{fontSize:24, fontWeight:700, marginTop:4}}>
-                        {receivableStats.remaining >= debtStats.remaining ? '+' : '-'}₺{fmt(Math.abs(receivableStats.remaining - debtStats.remaining))}
-                      </p>
-                    </div>
-                    <span style={{fontSize:32}}>{receivableStats.remaining >= debtStats.remaining ? '😊' : '😔'}</span>
-                  </div>
-                  <p style={{fontSize:11, marginTop:8, opacity:0.8}}>
-                    {receivableStats.remaining >= debtStats.remaining ? 'Alacakların borçlarından fazla!' : 'Borçların alacaklarından fazla'}
-                  </p>
-                </div>
+        if (!loanAndCard.length) {
+          html += '<div class="empty">Kredi veya kredi kartı kaydı yok.</div>';
+        }
 
-                <div style={{...S.totalCard, background: 'linear-gradient(135deg, var(--accent), #8a7a6e)'}}>
-                  <div>
-                    <p style={{fontSize:12,opacity:0.9}}>Toplam Aylık Yük</p>
-                    <p style={{fontSize:24,fontWeight:700,marginTop:4}}>₺{fmt(totalSubs + totalExp)}</p>
-                  </div>
-                </div>
-              </div>
-            )}
+        html += '<button class="add-btn" data-action="quick-add-payment">+ Yeni Gider Ekle</button>';
+        return html;
+      }
 
-            {/* Subscriptions */}
-            {tab === 'subs' && (
-              <div className="fade-up">
-                <div style={S.sectionHeader}>
-                  <h2 style={S.sectionTitle}>Abonelikler</h2>
-                  <span style={S.badge}>₺{fmt(totalSubs)}/ay</span>
-                </div>
+      function renderDebts() {
+        var stats = personalDebtStats();
+        var html = '' +
+          '<section class="summary-strip">' +
+            '<div class="summary-cell"><span>Toplam Borç</span><strong class="color-red">₺' + fmt(stats.borrowed) + '</strong></div>' +
+            '<div class="summary-cell"><span>Ödenen</span><strong class="color-green">₺' + fmt(stats.paid) + '</strong></div>' +
+            '<div class="summary-cell"><span>Kalan</span><strong class="color-red">₺' + fmt(stats.remaining) + '</strong></div>' +
+            '<div class="summary-cell"><span>Kayıt</span><strong>' + (state.personalDebts || []).length + '</strong></div>' +
+          '</section>';
 
-                <p style={S.hint}>💡 Fiyata dokun → düzenle</p>
+        html += '<section class="payment-section"><div class="section-title"><span>Kişisel Borçlar</span><strong>ekle / düş / düzenle</strong></div>';
+        (state.personalDebts || []).forEach(function (debt) {
+          html += renderDebtCard(debt);
+        });
+        html += '</section>';
 
-                {subs.map(s => (
-                  <div key={s.id} style={S.listItem}>
-                    <span style={S.listIcon}>{getIcon(s.name)}</span>
-                    <span style={S.listName}>{s.name}</span>
-                    <div style={S.listRight}>
-                      {editSub === s.id ? (
-                        <input type="number" autoFocus defaultValue={s.amount||''} placeholder="₺"
-                          onBlur={e => updateSub(s.id, e.target.value)} onKeyDown={e => e.key==='Enter' && updateSub(s.id, e.target.value)}
-                          style={S.inlineInput}/>
-                      ) : (
-                        <span style={{...S.listAmt, color:'var(--accent)', cursor:'pointer'}} onClick={() => setEditSub(s.id)}>
-                          {s.amount > 0 ? `₺${fmt(s.amount)}` : '—'}
-                        </span>
-                      )}
-                      <button onClick={() => delSub(s.id)} style={S.delBtn}>×</button>
-                    </div>
-                  </div>
-                ))}
+        if (!(state.personalDebts || []).length) {
+          html += '<div class="empty">Borç kaydı yok.</div>';
+        }
 
-                <div style={S.addRow}>
-                  <input type="text" placeholder="Platform adı" value={newSub.name} onChange={e => setNewSub({...newSub, name: e.target.value})} style={S.input}/>
-                  <input type="number" placeholder="₺" value={newSub.amount} onChange={e => setNewSub({...newSub, amount: e.target.value})} style={{...S.input, width:80, flex:'none'}}/>
-                  <button onClick={addSub} style={{...S.addBtn, background:'var(--accent)'}}>+</button>
-                </div>
-              </div>
-            )}
+        if (state.debtAddOpen) {
+          html += renderDebtAddForm();
+        } else {
+          html += '<button class="add-btn" data-action="show-debt-add">+ Borç Ekle</button>';
+        }
+        return html;
+      }
 
-            {/* Debts */}
-            {tab === 'debts' && (
-              <div className="fade-up">
-                <div style={S.sectionHeader}>
-                  <h2 style={S.sectionTitle}>Borçlarım</h2>
-                  <span style={{...S.badge, background: debtStats.remaining > 0 ? 'var(--warning)' : 'var(--success)'}}>
-                    ₺{fmt(Math.max(0, debtStats.remaining))}
-                  </span>
-                </div>
+      function renderDebtCard(debt) {
+        var t = debtTotals(debt);
+        if (state.debtEditKey === String(debt.id)) {
+          return '<article class="debt-card debt-edit-card">' +
+            '<form class="form-grid" data-debt-edit-form data-id="' + debt.id + '">' +
+              '<div class="field"><label>İsim</label><input class="input" name="name" value="' + esc(debt.name) + '" autocomplete="off"></div>' +
+              '<div class="field"><label>Toplam borç ₺</label><input class="input" name="total" type="number" inputmode="decimal" value="' + esc(t.borrowed) + '"></div>' +
+              '<div class="form-actions"><button type="button" class="primary-btn" data-action="save-debt-edit">Kaydet</button><button type="button" class="ghost-btn" data-action="cancel-debt-edit">İptal</button></div>' +
+            '</form>' +
+          '</article>';
+        }
+        var action = state.debtAction[String(debt.id)] || null;
+        var actionRow = action ? '<div class="debt-action-row">' +
+          '<input class="input" data-debt-action-amount="' + debt.id + '" type="number" inputmode="decimal" placeholder="' + (action === "pay" ? "Ödeme tutarı" : "Ek borç tutarı") + '">' +
+          '<button class="small-btn ' + (action === "pay" ? "green" : "red") + '" data-action="confirm-debt-action" data-id="' + debt.id + '">' + (action === "pay" ? "Düş" : "Ekle") + '</button>' +
+          '<button class="small-btn" data-action="cancel-debt-action" data-id="' + debt.id + '">İptal</button>' +
+        '</div>' : "";
 
-                <div style={S.addRow}>
-                  <input type="text" placeholder="Kime borçluyum?" value={newDebt.name} onChange={e => setNewDebt({...newDebt, name: e.target.value})} style={S.input}/>
-                  <input type="number" placeholder="Tutar ₺" value={newDebt.total} onChange={e => setNewDebt({...newDebt, total: e.target.value})} style={{...S.input, width:100, flex:'none'}}/>
-                  <button onClick={addDebt} style={{...S.addBtn, background:'var(--warning)'}}>+</button>
-                </div>
+        return '<article class="debt-card">' +
+          '<div class="debt-head">' +
+            brandMark(debt.name, "sm") +
+            '<div class="debt-copy"><h3>' + esc(debt.name) + '</h3><p>Alınan ₺' + fmt(t.borrowed) + ' · Ödenen ₺' + fmt(t.paid) + '</p></div>' +
+            '<strong class="debt-remain">₺' + fmt(t.remaining) + '</strong>' +
+          '</div>' +
+          '<div class="debt-actions">' +
+            '<button class="small-btn green" data-action="start-debt-action" data-type="pay" data-id="' + debt.id + '">Ödeme düş</button>' +
+            '<button class="small-btn red" data-action="start-debt-action" data-type="borrow" data-id="' + debt.id + '">Borç ekle</button>' +
+            '<button class="icon-btn" data-action="edit-debt" data-id="' + debt.id + '" aria-label="Düzenle">✎</button>' +
+            '<button class="icon-btn delete" data-action="delete-debt" data-id="' + debt.id + '" aria-label="Sil">×</button>' +
+          '</div>' +
+          actionRow +
+        '</article>';
+      }
 
-                {debts.map(d => {
-                  const rem = getDebtRemaining(d);
-                  const borrowed = d.transactions?.filter(t => t.type==='borrow').reduce((s,t) => s+t.amount, 0) || 0;
-                  const paidAmt = d.transactions?.filter(t => t.type==='pay').reduce((s,t) => s+t.amount, 0) || 0;
-                  const pct = borrowed > 0 ? (paidAmt / borrowed) * 100 : 0;
-                  const action = debtAction[d.id] || {};
-                  const done = rem <= 0;
+      function renderDebtAddForm() {
+        return '<section class="add-panel">' +
+          '<form class="form-grid" id="add-debt-form">' +
+            '<div class="field"><label>İsim</label><input class="input" name="name" autocomplete="off" placeholder="Örn. Murat"></div>' +
+            '<div class="field"><label>Toplam borç ₺</label><input class="input" name="total" type="number" inputmode="decimal" placeholder="0"></div>' +
+            '<div class="form-actions"><button type="button" class="primary-btn" data-action="add-debt">Ekle</button><button type="button" class="ghost-btn" data-action="hide-debt-add">Vazgeç</button></div>' +
+          '</form>' +
+        '</section>';
+      }
 
-                  return (
-                    <div key={d.id} style={{...S.debtCard, opacity: done ? 0.6 : 1}}>
-                      <div style={S.debtTop}>
-                        <div style={S.debtInfo}>
-                          <span style={S.debtIcon}>{getIcon(d.name)}</span>
-                          <div>
-                            <p style={S.debtName}>{d.name}</p>
-                            <p style={S.debtMeta}>Alınan: ₺{fmt(borrowed)} • Ödenen: ₺{fmt(paidAmt)}</p>
-                          </div>
-                        </div>
-                        <ProgressRing progress={Math.min(100, pct)} color={done ? 'var(--success)' : 'var(--warning)'}/>
-                      </div>
+      function renderTabBar() {
+        var tabs = [
+          { id: "expenses", icon: "₺", label: "Ödemeler" },
+          { id: "debts", icon: "B", label: "Borç" }
+        ];
+        return '<nav class="tabbar">' + tabs.map(function (tab) {
+          var active = state.tab === tab.id ? " active" : "";
+          return '<button class="tab' + active + '" data-action="tab" data-tab="' + tab.id + '"><i>' + esc(tab.icon) + '</i><span>' + esc(tab.label) + '</span></button>';
+        }).join("") + '</nav>';
+      }
 
-                      <div style={S.debtRemaining}>
-                        {done ? <span style={{color:'var(--success)', fontWeight:600}}>✓ Borç Kapandı!</span> : 
-                          <>Kalan Borç: <strong style={{color:'var(--warning)'}}>₺{fmt(rem)}</strong></>}
-                      </div>
+      function render() {
+        document.documentElement.setAttribute("data-theme", state.dark ? "dark" : "light");
+        storage.set("dark-mode", state.dark);
+        var stats = getStats();
+        var content = state.tab === "debts" ? renderDebts() : renderExpenses(stats);
+        root.innerHTML = '<div class="shell">' +
+          '<header class="topbar">' +
+            '<div><div class="brand-title"><strong>Finans</strong><span>Pro</span></div><div class="top-sub"><i class="privacy-dot"></i><span>' + MONTHS[now.getMonth()] + " " + now.getFullYear() + " · Yerel kasa</span></div></div>" +
+            '<button class="theme-btn" data-action="theme" aria-label="Tema değiştir">' + (state.dark ? "☀" : "☾") + '</button>' +
+          '</header>' +
+          '<main class="main">' + content + '</main>' +
+          renderTabBar() +
+        '</div>';
+      }
 
-                      {!done && (
-                        <>
-                          <div style={S.debtActions}>
-                            <button style={{...S.actBtn, ...(action.type==='pay' ? {background:'var(--success)', color:'#fff'} : {})}}
-                              onClick={() => setDebtAction({...debtAction, [d.id]: {type:'pay', amount:''}})}>💸 Ödeme Yap</button>
-                            <button style={{...S.actBtn, ...(action.type==='borrow' ? {background:'var(--danger)', color:'#fff'} : {})}}
-                              onClick={() => setDebtAction({...debtAction, [d.id]: {type:'borrow', amount:''}})}>➕ Borç Ekle</button>
-                          </div>
-                          {action.type && (
-                            <div style={S.actInput}>
-                              <input type="number" placeholder={action.type==='pay' ? 'Ödeme tutarı' : 'Ek borç tutarı'} value={action.amount}
-                                onChange={e => setDebtAction({...debtAction, [d.id]: {...action, amount: e.target.value}})} style={{...S.input, flex:1}}/>
-                              <button onClick={() => debtTx(d.id, action.type)} style={{...S.confirmBtn, background: action.type==='pay' ? 'var(--success)' : 'var(--danger)'}}>
-                                {action.type==='pay' ? '✓' : '+'}
-                              </button>
-                              <button onClick={() => setDebtAction({...debtAction, [d.id]: {type:null}})} style={S.cancelBtn}>×</button>
-                            </div>
-                          )}
-                        </>
-                      )}
+      function readNumber(form, name) {
+        var el = form.elements[name];
+        return el && el.value !== "" ? Number(el.value) || 0 : 0;
+      }
 
-                      {d.transactions?.length > 1 && (
-                        <div style={S.txHistory}>
-                          {d.transactions.slice(-3).reverse().map(t => (
-                            <div key={t.id} style={S.txItem}>
-                              <span style={{...S.txType, color: t.type==='pay' ? 'var(--success)' : 'var(--danger)'}}>
-                                {t.type==='pay' ? '↓ Ödeme' : '↑ Borç'}
-                              </span>
-                              <span style={S.txAmt}>₺{fmt(t.amount)}</span>
-                              <span style={S.txDate}>{new Date(t.date).toLocaleDateString('tr-TR', {day:'2-digit', month:'short'})}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+      function findPaymentByKey(key) {
+        return getMonthExp(state.year, state.month).filter(function (item) {
+          return paymentKey(item) === key;
+        })[0] || null;
+      }
 
-                      <button onClick={() => delDebt(d.id)} style={S.debtDel}>Sil</button>
-                    </div>
-                  );
-                })}
+      function parseKey(key) {
+        return { isRec: key.indexOf("r-") === 0, id: key.slice(2) };
+      }
 
-                {debts.length === 0 && <p style={S.empty}>Borç kaydı yok 🎉</p>}
-              </div>
-            )}
+      function togglePaid(key) {
+        var parsed = parseKey(key);
+        var current = state.paid[activeMonthKey()] || [];
+        var exists = current.indexOf(key) > -1;
+        var next = exists ? current.filter(function (item) { return item !== key; }) : current.concat([key]);
+        state.paid = Object.assign({}, state.paid);
+        state.paid[activeMonthKey()] = next;
+        storage.set("fp-paid", state.paid);
+        vibrate(12);
+      }
 
-            {/* YENİ: Receivables (Alacaklar) */}
-            {tab === 'receivables' && (
-              <div className="fade-up">
-                <div style={S.sectionHeader}>
-                  <h2 style={S.sectionTitle}>Alacaklarım</h2>
-                  <span style={{...S.badge, background: receivableStats.remaining > 0 ? 'var(--receivable)' : 'var(--text-muted)'}}>
-                    ₺{fmt(Math.max(0, receivableStats.remaining))}
-                  </span>
-                </div>
+      function deletePayment(key) {
+        var parsed = parseKey(key);
+        if (!confirm("Bu ödeme kalemi silinsin mi?")) return;
+        if (parsed.isRec) {
+          state.recurring = state.recurring.filter(function (item) { return String(item.id) !== parsed.id; });
+          storage.set("fp-recurring", state.recurring);
+        } else {
+          var keyMonth = activeMonthKey();
+          var list = state.oneTime[keyMonth] || [];
+          state.oneTime = Object.assign({}, state.oneTime);
+          state.oneTime[keyMonth] = list.filter(function (item) { return String(item.id) !== parsed.id; });
+          storage.set("fp-onetime", state.oneTime);
+        }
+        state.editKey = null;
+        vibrate(18);
+      }
 
-                <div style={S.addRow}>
-                  <input type="text" placeholder="Kimden alacağım?" value={newReceivable.name} onChange={e => setNewReceivable({...newReceivable, name: e.target.value})} style={S.input}/>
-                  <input type="number" placeholder="Tutar ₺" value={newReceivable.total} onChange={e => setNewReceivable({...newReceivable, total: e.target.value})} style={{...S.input, width:100, flex:'none'}}/>
-                  <button onClick={addReceivable} style={{...S.addBtn, background:'var(--receivable)'}}>+</button>
-                </div>
+      function saveEdit() {
+        var form = root.querySelector("[data-edit-form]");
+        if (!form) return;
+        var key = form.getAttribute("data-key");
+        var parsed = parseKey(key);
+        var totalInput = form.elements.total.value;
+        var patch = {
+          name: form.elements.name.value.trim() || "Ödeme",
+          amount: readNumber(form, "amount"),
+          day: Number(form.elements.day.value) || 1,
+          total: totalInput === "" ? null : Number(totalInput) || 0
+        };
+        if (parsed.isRec) {
+          state.recurring = state.recurring.map(function (item) {
+            return String(item.id) === parsed.id ? Object.assign({}, item, patch) : item;
+          });
+          storage.set("fp-recurring", state.recurring);
+        } else {
+          var keyMonth = activeMonthKey();
+          state.oneTime = Object.assign({}, state.oneTime);
+          state.oneTime[keyMonth] = (state.oneTime[keyMonth] || []).map(function (item) {
+            return String(item.id) === parsed.id ? Object.assign({}, item, patch) : item;
+          });
+          storage.set("fp-onetime", state.oneTime);
+        }
+        state.editKey = null;
+        vibrate(10);
+      }
 
-                {receivables.map(r => {
-                  const rem = getRecRemaining(r);
-                  const lent = r.transactions?.filter(t => t.type==='lend').reduce((s,t) => s+t.amount, 0) || 0;
-                  const collected = r.transactions?.filter(t => t.type==='collect').reduce((s,t) => s+t.amount, 0) || 0;
-                  const pct = lent > 0 ? (collected / lent) * 100 : 0;
-                  const action = recAction[r.id] || {};
-                  const done = rem <= 0;
+      function addPayment() {
+        var form = root.querySelector("#add-payment-form");
+        if (!form) return;
+        var name = form.elements.name.value.trim();
+        var amount = readNumber(form, "amount");
+        if (!name || !amount) return;
+        var day = Number(form.elements.day.value) || 1;
+        var total = form.elements.total.value === "" ? null : Number(form.elements.total.value) || 0;
+        var item = {
+          id: Date.now(),
+          name: name,
+          amount: amount,
+          total: total,
+          day: day
+        };
+        if (form.elements.recurring.checked) {
+          state.recurring = state.recurring.concat([Object.assign({}, item, {
+            startMonth: state.month,
+            startYear: state.year,
+            endMonth: 11,
+            endYear: state.year + 8
+          })]);
+          storage.set("fp-recurring", state.recurring);
+        } else {
+          var key = activeMonthKey();
+          state.oneTime = Object.assign({}, state.oneTime);
+          state.oneTime[key] = (state.oneTime[key] || []).concat([item]);
+          storage.set("fp-onetime", state.oneTime);
+        }
+        state.addOpen = false;
+        vibrate(12);
+      }
 
-                  return (
-                    <div key={r.id} style={{...S.debtCard, opacity: done ? 0.6 : 1, borderLeft: '3px solid var(--receivable)'}}>
-                      <div style={S.debtTop}>
-                        <div style={S.debtInfo}>
-                          <span style={S.debtIcon}>👤</span>
-                          <div>
-                            <p style={S.debtName}>{r.name}</p>
-                            <p style={S.debtMeta}>Verilen: ₺{fmt(lent)} • Tahsil: ₺{fmt(collected)}</p>
-                          </div>
-                        </div>
-                        <ProgressRing progress={Math.min(100, pct)} color={done ? 'var(--success)' : 'var(--receivable)'}/>
-                      </div>
+      function savePersonalDebts(next) {
+        state.personalDebts = next;
+        storage.set("fp-person-debts", next);
+      }
 
-                      <div style={S.debtRemaining}>
-                        {done ? <span style={{color:'var(--success)', fontWeight:600}}>✓ Alacak Tahsil Edildi!</span> : 
-                          <>Kalan Alacak: <strong style={{color:'var(--receivable)'}}>₺{fmt(rem)}</strong></>}
-                      </div>
+      function addDebt() {
+        var form = root.querySelector("#add-debt-form");
+        if (!form) return;
+        var name = form.elements.name.value.trim();
+        var total = readNumber(form, "total");
+        if (!name || total <= 0) return;
+        savePersonalDebts((state.personalDebts || []).concat([{
+          id: Date.now(),
+          name: name,
+          transactions: [{ id: Date.now() + 1, type: "borrow", amount: total, date: new Date().toISOString() }]
+        }]));
+        state.debtAddOpen = false;
+        vibrate(10);
+      }
 
-                      {!done && (
-                        <>
-                          <div style={S.debtActions}>
-                            <button style={{...S.actBtn, ...(action.type==='collect' ? {background:'var(--success)', color:'#fff'} : {})}}
-                              onClick={() => setRecAction({...recAction, [r.id]: {type:'collect', amount:''}})}>💰 Tahsil Et</button>
-                            <button style={{...S.actBtn, ...(action.type==='lend' ? {background:'var(--receivable)', color:'#fff'} : {})}}
-                              onClick={() => setRecAction({...recAction, [r.id]: {type:'lend', amount:''}})}>➕ Borç Ver</button>
-                          </div>
-                          {action.type && (
-                            <div style={S.actInput}>
-                              <input type="number" placeholder={action.type==='collect' ? 'Tahsil tutarı' : 'Ek borç verme'} value={action.amount}
-                                onChange={e => setRecAction({...recAction, [r.id]: {...action, amount: e.target.value}})} style={{...S.input, flex:1}}/>
-                              <button onClick={() => recTx(r.id, action.type)} style={{...S.confirmBtn, background: action.type==='collect' ? 'var(--success)' : 'var(--receivable)'}}>
-                                {action.type==='collect' ? '✓' : '+'}
-                              </button>
-                              <button onClick={() => setRecAction({...recAction, [r.id]: {type:null}})} style={S.cancelBtn}>×</button>
-                            </div>
-                          )}
-                        </>
-                      )}
+      function debtTransaction(id, type) {
+        var input = root.querySelector('[data-debt-action-amount="' + id + '"]');
+        var amount = input ? Number(input.value) || 0 : 0;
+        if (amount <= 0) return;
+        savePersonalDebts((state.personalDebts || []).map(function (debt) {
+          if (String(debt.id) !== String(id)) return debt;
+          return Object.assign({}, debt, {
+            transactions: (debt.transactions || []).concat([{ id: Date.now(), type: type, amount: amount, date: new Date().toISOString() }])
+          });
+        }));
+        var actions = Object.assign({}, state.debtAction);
+        delete actions[String(id)];
+        state.debtAction = actions;
+        vibrate(10);
+      }
 
-                      {r.transactions?.length > 1 && (
-                        <div style={S.txHistory}>
-                          {r.transactions.slice(-3).reverse().map(t => (
-                            <div key={t.id} style={S.txItem}>
-                              <span style={{...S.txType, color: t.type==='collect' ? 'var(--success)' : 'var(--receivable)'}}>
-                                {t.type==='collect' ? '↓ Tahsil' : '↑ Verilen'}
-                              </span>
-                              <span style={S.txAmt}>₺{fmt(t.amount)}</span>
-                              <span style={S.txDate}>{new Date(t.date).toLocaleDateString('tr-TR', {day:'2-digit', month:'short'})}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+      function saveDebtEdit() {
+        var form = root.querySelector("[data-debt-edit-form]");
+        if (!form) return;
+        var id = form.getAttribute("data-id");
+        var name = form.elements.name.value.trim() || "Borç";
+        var total = readNumber(form, "total");
+        savePersonalDebts((state.personalDebts || []).map(function (debt) {
+          if (String(debt.id) !== String(id)) return debt;
+          var txs = (debt.transactions || []).slice();
+          var firstBorrow = txs.find(function (tx) { return tx.type !== "pay"; });
+          if (firstBorrow) firstBorrow.amount = total;
+          else txs.unshift({ id: Date.now(), type: "borrow", amount: total, date: new Date().toISOString() });
+          return Object.assign({}, debt, { name: name, transactions: txs });
+        }));
+        state.debtEditKey = null;
+        vibrate(10);
+      }
 
-                      <button onClick={() => delReceivable(r.id)} style={S.debtDel}>Sil</button>
-                    </div>
-                  );
-                })}
+      function deleteDebt(id) {
+        if (!confirm("Bu borç kaydı silinsin mi?")) return;
+        savePersonalDebts((state.personalDebts || []).filter(function (debt) {
+          return String(debt.id) !== String(id);
+        }));
+        vibrate(18);
+      }
 
-                {receivables.length === 0 && <p style={S.empty}>Alacak kaydı yok</p>}
-              </div>
-            )}
+      root.addEventListener("click", function (event) {
+        var button = event.target.closest("[data-action]");
+        if (!button) return;
+        var action = button.getAttribute("data-action");
+        if (action === "theme") {
+          state.dark = !state.dark;
+        } else if (action === "tab") {
+          state.tab = button.getAttribute("data-tab");
+          state.addOpen = false;
+          state.editKey = null;
+          state.debtAddOpen = false;
+          state.debtEditKey = null;
+          state.debtAction = {};
+          vibrate(6);
+        } else if (action === "quick-add-payment") {
+          state.tab = "expenses";
+          state.addOpen = true;
+          state.editKey = null;
+          vibrate(6);
+        } else if (action === "prev-month") {
+          if (state.month === 0) {
+            state.month = 11;
+            state.year -= 1;
+          } else {
+            state.month -= 1;
+          }
+          state.editKey = null;
+          vibrate(6);
+        } else if (action === "next-month") {
+          if (state.month === 11) {
+            state.month = 0;
+            state.year += 1;
+          } else {
+            state.month += 1;
+          }
+          state.editKey = null;
+          vibrate(6);
+        } else if (action === "select-month") {
+          state.month = Number(button.getAttribute("data-month")) || 0;
+          state.editKey = null;
+          vibrate(6);
+        } else if (action === "toggle-paid") {
+          togglePaid(button.getAttribute("data-key"));
+        } else if (action === "edit-payment") {
+          state.editKey = button.getAttribute("data-key");
+          state.addOpen = false;
+          vibrate(6);
+        } else if (action === "delete-payment") {
+          deletePayment(button.getAttribute("data-key"));
+        } else if (action === "save-edit") {
+          saveEdit();
+        } else if (action === "cancel-edit") {
+          state.editKey = null;
+        } else if (action === "show-add") {
+          state.addOpen = true;
+          state.editKey = null;
+        } else if (action === "hide-add") {
+          state.addOpen = false;
+        } else if (action === "add-payment") {
+          addPayment();
+        } else if (action === "show-debt-add") {
+          state.debtAddOpen = true;
+          state.debtEditKey = null;
+          state.debtAction = {};
+        } else if (action === "hide-debt-add") {
+          state.debtAddOpen = false;
+        } else if (action === "add-debt") {
+          addDebt();
+        } else if (action === "start-debt-action") {
+          state.debtAction = Object.assign({}, state.debtAction, (function () {
+            var o = {};
+            o[String(button.getAttribute("data-id"))] = button.getAttribute("data-type");
+            return o;
+          })());
+          state.debtEditKey = null;
+          state.debtAddOpen = false;
+        } else if (action === "confirm-debt-action") {
+          var id = button.getAttribute("data-id");
+          debtTransaction(id, state.debtAction[String(id)] || "pay");
+        } else if (action === "cancel-debt-action") {
+          var cancelActions = Object.assign({}, state.debtAction);
+          delete cancelActions[String(button.getAttribute("data-id"))];
+          state.debtAction = cancelActions;
+        } else if (action === "edit-debt") {
+          state.debtEditKey = String(button.getAttribute("data-id"));
+          state.debtAction = {};
+          state.debtAddOpen = false;
+        } else if (action === "save-debt-edit") {
+          saveDebtEdit();
+        } else if (action === "cancel-debt-edit") {
+          state.debtEditKey = null;
+        } else if (action === "delete-debt") {
+          deleteDebt(button.getAttribute("data-id"));
+        }
+        render();
+      });
 
-            {/* Expenses */}
-            {tab === 'expenses' && (
-              <div className="fade-up">
-                <div style={S.monthNav}>
-                  <button onClick={prevMonth} style={S.navBtn}>‹</button>
-                  <div style={S.monthTitle}>
-                    <span style={{fontSize:18, fontWeight:600}}>{MONTHS[month]}</span>
-                    <span style={{fontSize:12, color:'var(--text-muted)'}}>{year}</span>
-                  </div>
-                  <button onClick={nextMonth} style={S.navBtn}>›</button>
-                </div>
+      root.addEventListener("input", function (event) {
+        var input = event.target;
+        if (input.matches("[data-live-brand]")) {
+          var value = input.value.trim() || "Yeni ödeme";
+          var preview = root.querySelector("[data-brand-preview]");
+          if (preview) {
+            var b = brandOf(value);
+            preview.innerHTML = brandMark(value, "xl") + '<div><strong>' + esc(value) + '</strong><span class="preview-sub">' + esc(b.label) + "</span></div>";
+          }
+        }
+      });
 
-                <div style={S.miniCal}>
-                  {MONTHS.map((m, i) => {
-                    const mn = monthNum(year, i);
-                    const hasData = (oneTime[`${year}-${i}`]||[]).length > 0 || recurring.some(e => mn >= monthNum(e.startYear, e.startMonth) && mn <= monthNum(e.endYear, e.endMonth));
-                    return (
-                      <button key={i} onClick={() => { vibrate(5); setMonth(i); }} style={{
-                        ...S.calBtn, ...(i === month ? S.calBtnActive : {}), ...(hasData && i !== month ? S.calBtnData : {})
-                      }}>{m.slice(0,3)}</button>
-                    );
-                  })}
-                </div>
-
-                <div style={S.expStats}>
-                  <div style={S.expStat}>
-                    <span style={S.expStatLabel}>Toplam</span>
-                    <span style={{...S.expStatVal, color:'var(--text)'}}>₺{fmt(totalExp)}</span>
-                  </div>
-                  <div style={S.expStatDiv}/>
-                  <div style={S.expStat}>
-                    <span style={S.expStatLabel}>Ödenen</span>
-                    <span style={{...S.expStatVal, color:'var(--success)'}}>₺{fmt(paidExp)}</span>
-                  </div>
-                  <div style={S.expStatDiv}/>
-                  <div style={S.expStat}>
-                    <span style={S.expStatLabel}>Kalan</span>
-                    <span style={{...S.expStatVal, color:'var(--danger)'}}>₺{fmt(unpaidExp)}</span>
-                  </div>
-                </div>
-
-                <div style={S.addRow}>
-                  <input type="text" placeholder="Gider adı" value={newExp.name} onChange={e => setNewExp({...newExp, name: e.target.value})} style={S.input}/>
-                  <input type="number" placeholder="₺" value={newExp.amount} onChange={e => setNewExp({...newExp, amount: e.target.value})} style={{...S.input, width:80, flex:'none'}}/>
-                  <label style={S.recToggle}>
-                    <input type="checkbox" checked={newExp.recurring} onChange={e => { setNewExp({...newExp, recurring: e.target.checked}); setShowRecForm(e.target.checked); }}/>
-                    <span>🔄</span>
-                  </label>
-                </div>
-
-                {showRecForm && (
-                  <div style={S.recForm}>
-                    <span style={{fontSize:13, color:'var(--info)'}}>📅 {MONTHS[month]} {year}'dan →</span>
-                    <div style={S.recSelects}>
-                      <select value={newExp.endMonth} onChange={e => setNewExp({...newExp, endMonth: parseInt(e.target.value)})} style={S.select}>
-                        {MONTHS.map((m,i) => <option key={i} value={i}>{m}</option>)}
-                      </select>
-                      <select value={newExp.endYear} onChange={e => setNewExp({...newExp, endYear: parseInt(e.target.value)})} style={S.select}>
-                        {[0,1,2,3,4,5].map(i => <option key={i} value={now.getFullYear()+i}>{now.getFullYear()+i}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                )}
-
-                <button onClick={addExp} style={{...S.fullBtn, background: newExp.recurring ? 'var(--info)' : 'var(--success)'}}>
-                  {newExp.recurring ? '🔄 Tekrarlayan Ekle' : '+ Gider Ekle'}
-                </button>
-
-                {allExp.filter(e => !isPaid(e.id, e.isRec)).length > 0 && (
-                  <div style={S.expSection}>
-                    <h4 style={S.expSecTitle}>⏳ Bekleyen ({allExp.filter(e => !isPaid(e.id, e.isRec)).length})</h4>
-                    {allExp.filter(e => !isPaid(e.id, e.isRec)).map(e => (
-                      <div key={`${e.isRec?'r':'o'}-${e.id}`} style={{...S.expItem, borderLeft: e.isRec ? '3px solid var(--info)' : '3px solid var(--success)'}}>
-                        <button onClick={() => togglePaid(e.id, e.isRec)} style={S.checkBtn}>
-                          <span style={S.unchecked}/>
-                        </button>
-                        <span style={S.expIcon}>{getIcon(e.name)}</span>
-                        <div style={{flex:1}}>
-                          <span style={S.expName}>{e.name}</span>
-                          {e.isRec && <span style={S.recBadge}>→ {MONTHS[e.endMonth].slice(0,3)} {e.endYear}</span>}
-                        </div>
-                        <span style={{...S.expAmt, color: e.isRec ? 'var(--info)' : 'var(--success)'}}>₺{fmt(e.amount)}</span>
-                        <button onClick={() => delExp(e.id, e.isRec)} style={S.delBtn}>×</button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {allExp.filter(e => isPaid(e.id, e.isRec)).length > 0 && (
-                  <div style={S.expSection}>
-                    <h4 style={S.expSecTitle}>✓ Ödenen ({allExp.filter(e => isPaid(e.id, e.isRec)).length})</h4>
-                    {allExp.filter(e => isPaid(e.id, e.isRec)).map(e => (
-                      <div key={`${e.isRec?'r':'o'}-${e.id}`} style={{...S.expItem, ...S.paidItem}}>
-                        <button onClick={() => togglePaid(e.id, e.isRec)} style={S.checkBtn}>
-                          <span style={S.checked}>✓</span>
-                        </button>
-                        <span style={{...S.expIcon, opacity:0.5}}>{getIcon(e.name)}</span>
-                        <span style={S.paidName}>{e.name}</span>
-                        <span style={S.paidAmt}>₺{fmt(e.amount)}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {allExp.length === 0 && <p style={S.empty}>{MONTHS[month]} için gider yok</p>}
-
-                <div style={{...S.totalCard, background: unpaidExp > 0 ? 'var(--danger)' : 'var(--success)', marginTop:16}}>
-                  <span>{unpaidExp > 0 ? 'Kalan Ödeme' : '✓ Tamamlandı!'}</span>
-                  <span style={{fontSize:20, fontWeight:700}}>₺{fmt(unpaidExp)}</span>
-                </div>
-              </div>
-            )}
-          </main>
-
-          {/* Tab Bar */}
-          <nav style={S.tabBar}>
-            {[
-              {id:'dashboard', icon:'📊', label:'Özet'},
-              {id:'subs', icon:'📱', label:'Abonelik'},
-              {id:'debts', icon:'📉', label:'Borç'},
-              {id:'receivables', icon:'📈', label:'Alacak'},
-              {id:'expenses', icon:'📋', label:'Gider'}
-            ].map(t => (
-              <button key={t.id} onClick={() => { vibrate(5); setTab(t.id); }} style={{...S.tabItem, ...(tab === t.id ? S.tabActive : {})}}>
-                <span style={S.tabIcon}>{t.icon}</span>
-                <span style={S.tabLabel}>{t.label}</span>
-              </button>
-            ))}
-          </nav>
-        </div>
-      );
-    }
-
-    const S = {
-      app: { minHeight:'100vh', display:'flex', flexDirection:'column', background:'var(--bg)' },
-      loading: { display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh', background:'var(--bg)' },
-      spinner: { width:32, height:32, border:'3px solid var(--border)', borderTopColor:'var(--accent)', borderRadius:'50%', animation:'spin 1s linear infinite' },
-      header: { display:'flex', justifyContent:'space-between', alignItems:'center', padding:'16px 20px', background:'var(--bg-card)', borderBottom:'1px solid var(--border)' },
-      logo: { fontSize:20, fontWeight:700, margin:0 },
-      date: { fontSize:12, color:'var(--text-muted)', marginTop:2 },
-      themeBtn: { width:40, height:40, borderRadius:12, border:'1px solid var(--border)', background:'var(--bg-secondary)', fontSize:18, cursor:'pointer' },
-      main: { flex:1, padding:'16px 16px 100px', maxWidth:500, margin:'0 auto', width:'100%', overflowY:'auto' },
-
-      statsGrid: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:16 },
-      statCard: { background:'var(--bg-card)', borderRadius:12, padding:12, cursor:'pointer', display:'flex', alignItems:'center', gap:10 },
-      statIcon: { fontSize:22 },
-      statLabel: { fontSize:10, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:0.5 },
-      statValue: { fontSize:14, fontWeight:700, marginTop:2 },
-      card: { background:'var(--bg-card)', borderRadius:16, padding:16, marginBottom:12, border:'1px solid var(--border)' },
-      cardTitle: { fontSize:14, fontWeight:600, margin:0 },
-      chartLabels: { display:'flex', justifyContent:'space-between', marginTop:8 },
-      chartLabel: { fontSize:10, color:'var(--text-muted)' },
-      donutContainer: { display:'flex', alignItems:'center', justifyContent:'space-around', marginTop:12 },
-      donutLegend: { display:'flex', flexDirection:'column', gap:6 },
-      legendItem: { display:'flex', alignItems:'center', gap:8, fontSize:11, color:'var(--text-muted)' },
-      legendDot: { width:10, height:10, borderRadius:5 },
-      totalCard: { borderRadius:14, padding:'16px 20px', color:'#fff', display:'flex', justifyContent:'space-between', alignItems:'center' },
-
-      sectionHeader: { display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 },
-      sectionTitle: { fontSize:20, fontWeight:700, margin:0 },
-      badge: { fontSize:12, fontWeight:600, background:'var(--accent)', color:'#fff', padding:'4px 10px', borderRadius:20 },
-      hint: { fontSize:12, color:'var(--text-muted)', background:'var(--bg-secondary)', padding:'10px 14px', borderRadius:8, marginBottom:12, textAlign:'center' },
-
-      listItem: { display:'flex', alignItems:'center', gap:12, padding:'14px 16px', background:'var(--bg-card)', borderRadius:12, marginBottom:8, border:'1px solid var(--border)' },
-      listIcon: { fontSize:22 },
-      listName: { flex:1, fontSize:15, fontWeight:500 },
-      listRight: { display:'flex', alignItems:'center', gap:10 },
-      listAmt: { fontSize:15, fontWeight:600 },
-      inlineInput: { width:80, padding:'8px 10px', border:'2px solid var(--accent)', borderRadius:8, background:'var(--bg)', color:'var(--text)', fontSize:14, textAlign:'right' },
-      delBtn: { width:28, height:28, borderRadius:8, border:'none', background:'var(--bg-secondary)', color:'var(--text-muted)', fontSize:16, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' },
-
-      addRow: { display:'flex', gap:8, marginBottom:12, padding:12, background:'var(--bg-card)', borderRadius:12, border:'1px solid var(--border)', alignItems:'center' },
-      input: { flex:1, padding:'12px 14px', border:'1px solid var(--border)', borderRadius:10, background:'var(--bg)', color:'var(--text)', fontSize:16 },
-      addBtn: { width:44, height:44, borderRadius:10, border:'none', color:'#fff', fontSize:20, fontWeight:600, cursor:'pointer' },
-      fullBtn: { width:'100%', padding:14, borderRadius:12, border:'none', color:'#fff', fontSize:15, fontWeight:600, cursor:'pointer', marginBottom:16 },
-
-      debtCard: { background:'var(--bg-card)', borderRadius:14, padding:16, marginBottom:12, border:'1px solid var(--border)' },
-      debtTop: { display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12 },
-      debtInfo: { display:'flex', alignItems:'center', gap:12 },
-      debtIcon: { fontSize:28 },
-      debtName: { fontSize:16, fontWeight:600 },
-      debtMeta: { fontSize:11, color:'var(--text-muted)', marginTop:2 },
-      debtRemaining: { fontSize:14, color:'var(--text-muted)', marginBottom:12 },
-      debtActions: { display:'flex', gap:8, marginBottom:8 },
-      actBtn: { flex:1, padding:10, borderRadius:8, border:'1px solid var(--border)', background:'var(--bg)', color:'var(--text)', fontSize:13, fontWeight:500, cursor:'pointer' },
-      actInput: { display:'flex', gap:8, marginTop:8 },
-      confirmBtn: { padding:'12px 16px', borderRadius:8, border:'none', color:'#fff', fontSize:16, fontWeight:600, cursor:'pointer' },
-      cancelBtn: { padding:'12px 14px', borderRadius:8, border:'1px solid var(--border)', background:'var(--bg)', color:'var(--text-muted)', fontSize:16, cursor:'pointer' },
-      txHistory: { marginTop:12, paddingTop:12, borderTop:'1px dashed var(--border)' },
-      txItem: { display:'flex', alignItems:'center', gap:8, padding:'6px 0', fontSize:12 },
-      txType: { fontWeight:600, minWidth:60 },
-      txAmt: { flex:1, fontWeight:500 },
-      txDate: { color:'var(--text-light)' },
-      debtDel: { width:'100%', marginTop:12, padding:10, borderRadius:8, border:'1px solid var(--border)', background:'transparent', color:'var(--danger)', fontSize:13, cursor:'pointer' },
-
-      monthNav: { display:'flex', justifyContent:'space-between', alignItems:'center', padding:14, background:'var(--bg-card)', borderRadius:14, marginBottom:12, border:'1px solid var(--border)' },
-      navBtn: { width:40, height:40, borderRadius:10, border:'1px solid var(--border)', background:'var(--bg)', color:'var(--text)', fontSize:20, cursor:'pointer' },
-      monthTitle: { display:'flex', flexDirection:'column', alignItems:'center' },
-      miniCal: { display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:6, marginBottom:12 },
-      calBtn: { padding:'10px 4px', borderRadius:8, border:'1px solid var(--border)', background:'var(--bg-card)', color:'var(--text-muted)', fontSize:11, fontWeight:600, cursor:'pointer' },
-      calBtnActive: { background:'var(--success)', color:'#fff', border:'1px solid var(--success)' },
-      calBtnData: { borderColor:'var(--success)', color:'var(--success)' },
-      expStats: { display:'flex', justifyContent:'space-around', padding:14, background:'var(--bg-card)', borderRadius:12, marginBottom:12, border:'1px solid var(--border)' },
-      expStat: { display:'flex', flexDirection:'column', alignItems:'center', gap:2 },
-      expStatLabel: { fontSize:10, color:'var(--text-muted)', textTransform:'uppercase' },
-      expStatVal: { fontSize:15, fontWeight:700 },
-      expStatDiv: { width:1, background:'var(--border)' },
-      recToggle: { display:'flex', alignItems:'center', gap:4, cursor:'pointer', fontSize:20 },
-      recForm: { padding:14, marginBottom:12, background:'var(--bg-secondary)', borderRadius:12, border:'1px solid var(--info)' },
-      recSelects: { display:'flex', gap:8, marginTop:8 },
-      select: { padding:'10px 12px', borderRadius:8, border:'1px solid var(--border)', background:'var(--bg-card)', color:'var(--text)', fontSize:14 },
-      expSection: { marginBottom:16 },
-      expSecTitle: { fontSize:13, fontWeight:600, color:'var(--text-muted)', margin:'0 0 10px' },
-      expItem: { display:'flex', alignItems:'center', gap:10, padding:12, background:'var(--bg-card)', borderRadius:10, marginBottom:8, border:'1px solid var(--border)' },
-      checkBtn: { width:28, height:28, border:'none', background:'transparent', cursor:'pointer', padding:0 },
-      unchecked: { display:'block', width:24, height:24, border:'2px solid var(--border)', borderRadius:12 },
-      checked: { display:'flex', alignItems:'center', justifyContent:'center', width:24, height:24, background:'var(--success)', borderRadius:12, color:'#fff', fontSize:14, fontWeight:700, animation:'checkPop 0.3s ease' },
-      expIcon: { fontSize:20 },
-      expName: { fontSize:14, fontWeight:500 },
-      recBadge: { display:'block', fontSize:11, color:'var(--info)', marginTop:2 },
-      expAmt: { fontSize:14, fontWeight:600 },
-      paidItem: { opacity:0.6, background:'var(--bg-secondary)' },
-      paidName: { flex:1, fontSize:14, textDecoration:'line-through', color:'var(--text-muted)' },
-      paidAmt: { fontSize:14, textDecoration:'line-through', color:'var(--text-muted)' },
-      empty: { textAlign:'center', color:'var(--text-light)', padding:'40px 20px', fontSize:14 },
-
-      tabBar: { position:'fixed', bottom:0, left:0, right:0, display:'flex', background:'var(--bg-card)', borderTop:'1px solid var(--border)', paddingBottom:'env(safe-area-inset-bottom)' },
-      tabItem: { flex:1, padding:'10px 0 6px', border:'none', background:'transparent', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:2, color:'var(--text-muted)' },
-      tabActive: { color:'var(--accent)' },
-      tabIcon: { fontSize:20 },
-      tabLabel: { fontSize:9, fontWeight:500 }
-    };
-
-    const style = document.createElement('style');
-    style.textContent = `@keyframes spin{to{transform:rotate(360deg)}}@keyframes checkPop{0%{transform:scale(0)}50%{transform:scale(1.3)}100%{transform:scale(1)}}`;
-    document.head.appendChild(style);
-
-    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+      render();
+    })();
   </script>
 </body>
 </html>
